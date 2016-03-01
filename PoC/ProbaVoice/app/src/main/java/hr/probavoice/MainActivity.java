@@ -1,32 +1,22 @@
 package hr.probavoice;
 
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.hardware.Camera;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.SeekBar;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
-import org.jtransforms.fft.DoubleFFT_1D;
-
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
-import hr.sound.AndroidAudioInput;
-import hr.sound.AndroidAudioOutput;
-import hr.sound.AudioInputDevice;
-import hr.sound.AudioOutputDevice;
-import hr.sound.PlayingThread;
-import hr.sound.ReadingThread;
+import hr.image.CameraView;
 import hr.sound.SoundProcessing;
-import hr.sound.TrackElement;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -47,13 +37,35 @@ public class MainActivity extends ActionBarActivity {
         System.loadLibrary("proba");
     }
 
+    @SuppressWarnings("JNI")
     public native int sumaArray(int[] arej);
     public native String dohvatiString();
+    public native Bitmap loadBitmap(Bitmap bitmap);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Button cameraButton = (Button)findViewById(R.id.buttonStartCamera);
+        cameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startCameraActivity();
+            }
+        });
+
+        /*
+        final ImageView iv = (ImageView)findViewById(R.id.imageView2);
+
+        /*final Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.image1);
+        final Bitmap bm2 = loadBitmap(bitmap);
+        iv.setImageBitmap(bm2);*/
+
+
+
+/*
         Button button = (Button) findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -61,6 +73,13 @@ public class MainActivity extends ActionBarActivity {
                 processing.stop();
             }
         });
+        /*button.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                iv.setImageBitmap(loadBitmap(bitmap));
+            }
+        });*/
+/*
         SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -120,11 +139,16 @@ public class MainActivity extends ActionBarActivity {
 
         processing = new SoundProcessing(device, device2);
         processing.start();
-        /*Log.e("proba ", "" + sumaArray(new int[]{2, 3, 4, 2}));
-        Log.e("proba22 ", dohvatiString());*/
+        Log.e("proba ", "" + sumaArray(new int[]{2, 3, 4, 2}));
+        Log.e("proba22 ", dohvatiString());
         //NoiseSuppressor.create(record.getAudioSessionId());
         //AcousticEchoCanceler.create(record.getAudioSessionId());
+*/
+    }
 
+    public void startCameraActivity(){
+        Intent intent = new Intent(this, CameraActivity.class);
+        startActivity(intent);
     }
 
     @Override

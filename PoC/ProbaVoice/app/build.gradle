@@ -6,11 +6,17 @@ android {
 
     defaultConfig {
         applicationId "hr.probavoice"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
-        ndk { moduleName="proba" }
+        ndk {
+            moduleName "proba"
+            abiFilters "armeabi"
+            abiFilters "armeabi-v7a"
+            ldLibs "android"
+            ldLibs "jnigraphics"
+        }
     }
     buildTypes {
         release {
@@ -20,8 +26,10 @@ android {
     }
 }
 
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.2.0'
     compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:support-v4:21.0.3'
 }

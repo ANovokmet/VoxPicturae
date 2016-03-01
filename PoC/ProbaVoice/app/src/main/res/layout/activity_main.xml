@@ -58,4 +58,12 @@
         android:indeterminate="false"
         android:progress="1000" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Camera"
+        android:id="@+id/buttonStartCamera"
+        android:layout_below="@+id/textView"
+        android:layout_alignEnd="@+id/seekBar" />
+
 </RelativeLayout>
