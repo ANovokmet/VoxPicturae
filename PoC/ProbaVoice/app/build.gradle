@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "hr.probavoice"
-        minSdkVersion 21
+        minSdkVersion 18
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
@@ -14,8 +14,10 @@ android {
             moduleName "proba"
             abiFilters "armeabi"
             abiFilters "armeabi-v7a"
+            stl "stlport_static"
             ldLibs "android"
             ldLibs "jnigraphics"
+            cFlags "-fexceptions"
         }
     }
     buildTypes {
