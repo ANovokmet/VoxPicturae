@@ -45,14 +45,18 @@ public class CameraActivity extends ActionBarActivity {
         newOpenCamera();
         initializeCameraView();
 
+
+
         Camera.Size currentSize = mCameraView.getCurrentPreviewSize();
 
 
         //testiranje maske/okvira
         // maska se iscrtava na vrh imageviewa
         // trebalo bi jednostavno u photoshopu uredit masku da ima prozirnost i sve
-        // zbog ovoga štucne na 0.3s pri loadanju
+        // zbog ovoga stucne na 0.3s pri loadanju
         // isti kod u cameraview
+
+
         ImageView imageViewMask = (ImageView)findViewById(R.id.imageViewMask);
 
         Bitmap bitmapMask = BitmapFactory.decodeResource(getResources(), R.drawable.mask2);

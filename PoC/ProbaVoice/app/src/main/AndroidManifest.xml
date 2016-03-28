@@ -26,7 +26,10 @@
         </activity>
         <activity
             android:name=".CameraActivity"
-            android:label="@string/title_activity_camera"></activity>
+            android:label="@string/title_activity_camera" />
+        <activity
+            android:name=".GPUCameraActivity"
+            android:label="@string/title_activity_gpucamera"></activity>
     </application>
 
 </manifest>

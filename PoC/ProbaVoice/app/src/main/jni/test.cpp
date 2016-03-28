@@ -224,7 +224,7 @@ int transformChannelUsingFunction(int value, int* function){
 int normalizeChannel(int value, int sourceMin, int sourceMax, int destMin, int destMax){
     value = clamp(value, sourceMin, sourceMax);
 
-    int sourceRange = sourceMax - sourceMin;
+    int sourceRange = sourceMax - sourceMin;//1
     int destRange = destMax - destMin;
 
     float scale = (float)destRange / sourceRange;

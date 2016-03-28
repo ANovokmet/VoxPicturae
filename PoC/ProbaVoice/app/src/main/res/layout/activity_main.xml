@@ -66,4 +66,13 @@
         android:layout_below="@+id/textView"
         android:layout_alignEnd="@+id/seekBar" />
 
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GPU Camera"
+        android:id="@+id/buttonStartGPUCamera"
+        android:layout_below="@+id/buttonStartCamera"
+        android:layout_alignParentEnd="true" />
+
 </RelativeLayout>

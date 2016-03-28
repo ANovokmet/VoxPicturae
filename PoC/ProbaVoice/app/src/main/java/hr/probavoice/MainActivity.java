@@ -56,6 +56,14 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        Button gpuCameraButton = (Button)findViewById(R.id.buttonStartGPUCamera);
+        gpuCameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startGPUCameraActivity();
+            }
+        });
+
         /*
         final ImageView iv = (ImageView)findViewById(R.id.imageView2);
 
@@ -148,6 +156,11 @@ public class MainActivity extends ActionBarActivity {
 
     public void startCameraActivity(){
         Intent intent = new Intent(this, CameraActivity.class);
+        startActivity(intent);
+    }
+
+    public void startGPUCameraActivity(){
+        Intent intent = new Intent(this, GPUCameraActivity.class);
         startActivity(intent);
     }
 

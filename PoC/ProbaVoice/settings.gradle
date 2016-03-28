@@ -1,1 +1,3 @@
 include ':app'
+include ':GPUImage'
+project(':GPUImage').projectDir = new File('libs/GPUImage')
