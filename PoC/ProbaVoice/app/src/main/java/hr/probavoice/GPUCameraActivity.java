@@ -4,14 +4,25 @@ import android.app.Activity;
 import android.graphics.PointF;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.Display;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+
 import hr.image.CameraController;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
+import jp.co.cyberagent.android.gpuimage.GPUImageContrastFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageFilterGroup;
 import jp.co.cyberagent.android.gpuimage.GPUImageSwirlFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageVignetteFilter;
 import jp.co.cyberagent.android.gpuimage.ProbaVoiceFilter;
 
 public class GPUCameraActivity extends Activity {
@@ -46,14 +57,24 @@ public class GPUCameraActivity extends Activity {
             }
         });
 
-        mCameraController = new CameraController(mGPUImage);
+        mCameraController = new CameraController(this, mGPUImage);
 
         Display display = getWindowManager().getDefaultDisplay();
         int width = display.getWidth();
         int height = display.getHeight();
         mCameraController.setAreaSize(width, height);
 
-        mGPUImage.setFilter(new ProbaVoiceFilter());
+
+
+
+
+        List<GPUImageFilter> filters = new ArrayList<GPUImageFilter>();
+        filters.add(new ProbaVoiceFilter());
+        filters.add(new GPUImageContrastFilter(2.0f));
+        filters.add(new GPUImageVignetteFilter(new PointF(0.5f,0.5f), new float[] {0.0f, 0.0f, 0.0f}, 0.3f, 0.75f));
+        GPUImageFilterGroup group = new GPUImageFilterGroup(filters);
+
+        mGPUImage.setFilter(group);
 
     }
 
