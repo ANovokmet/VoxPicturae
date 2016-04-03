@@ -25,10 +25,10 @@ public class PlayingThread implements Runnable{
         device.start();
         while(!stop){
             try {
-                TrackElement a = this.workQueue.poll(5, TimeUnit.SECONDS);
-                while(a != null){
-                    this.device.write(a.getData(), a.getData().length);
-                    a = this.workQueue.poll(5, TimeUnit.SECONDS);
+                TrackElement element = this.workQueue.poll(5, TimeUnit.SECONDS);
+                while(element != null){
+                    this.device.write(element.getData(), element.getData().length);
+                    element = this.workQueue.poll(5, TimeUnit.SECONDS);
                 }
             }catch(Exception e){
                 LOGGER.severe(e.getMessage());

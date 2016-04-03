@@ -1,24 +1,31 @@
 package hr.picsona;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.Toast;
 
 import hr.sound.AndroidAudioInput;
 import hr.sound.AndroidAudioOutput;
 import hr.sound.AudioInputDevice;
 import hr.sound.AudioOutputDevice;
+import hr.sound.ProcessingResult;
 import hr.sound.SoundProcessing;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class Main extends AppCompatActivity {
+public class Main extends AppCompatActivity implements SoundProcessing.OnProcessingUpdateListener{
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -89,6 +96,12 @@ public class Main extends AppCompatActivity {
         }
     };
 
+    /*@Override
+    public boolean dispatchTouchEvent (MotionEvent ev) {  //dodir ekrana
+        Toast.makeText(Main.this, "proba", Toast.LENGTH_SHORT).show();
+        return super.dispatchTouchEvent(ev);
+    }*/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,20 +124,33 @@ public class Main extends AppCompatActivity {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        AudioInputDevice device = null;
-        try{
-            device = new AndroidAudioInput(44100);
-        }catch(Exception e){};
-        AudioOutputDevice device2 = new AndroidAudioOutput(44100);
 
-        final SoundProcessing processing = new SoundProcessing(device, device2);
-        processing.start();
         findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
-        findViewById(R.id.dummy_button).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.recordSound).setOnClickListener(new View.OnClickListener() {
+
+            SoundProcessing processing;
+            boolean recording = false;
 
             @Override
             public void onClick(View v) {
-                processing.stop();
+                if (recording == false) {
+                    AudioInputDevice device = null;
+                    try {
+                        device = new AndroidAudioInput(44100);
+                    } catch (Exception e) {
+                        return;
+                    }
+                    ;
+                    ((Button) v).setText("Stop recording");
+                    processing = new SoundProcessing(device, null, 44100);
+                    processing.setListener(Main.this);
+                    processing.start();
+                    recording = true;
+                } else {
+                    ((Button) v).setText("Start recording");
+                    processing.stop();
+                    recording = false;
+                }
             }
         });
     }
@@ -180,5 +206,15 @@ public class Main extends AppCompatActivity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    @Override
+    public void onUpdate(double[] soundData) {
+
+    }
+
+    @Override
+    public void onFinish(ProcessingResult result) {
+        Log.e("rezultati", ""+result);
     }
 }

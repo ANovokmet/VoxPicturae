@@ -19,21 +19,22 @@ public class ProcessingThread implements Runnable {
     private BlockingQueue<TrackElement> inputQueue;
     private BlockingQueue<TrackElement> outputQueue;
     private boolean stop = false;
+    private OnUpdateListener listener;
 
-    private int TIME_WINDOW = SoundProcessing.TIME_WINDOW;
     private int FREQ_RANGE_FOR_POWER_SUM = 50;
 
-    public ProcessingThread(BlockingQueue<TrackElement> inputQueue, BlockingQueue<TrackElement> outputQueue) {
+    public ProcessingThread(BlockingQueue<TrackElement> inputQueue, BlockingQueue<TrackElement> outputQueue, OnUpdateListener listener) {
         if (inputQueue == null) {
             throw new RuntimeException("InputQueue must not be null");
         }
         this.inputQueue = inputQueue;
         this.outputQueue = outputQueue;
+        this.listener = listener;
     }
 
     @Override
     public void run() {
-        DoubleFFT_1D fft = new DoubleFFT_1D(TIME_WINDOW);
+        DoubleFFT_1D fft = new DoubleFFT_1D(SoundProcessing.TIME_WINDOW);
         while (!stop) {
             TrackElement element = null;
             try {
@@ -51,54 +52,54 @@ public class ProcessingThread implements Runnable {
 
             element.setPower(SignalAverage.RMSsignalAverage(data));
 
-            int min_frekv = (int) PitchDetector.getInstance().getPitch(data);
+            int minFreq = (int) PitchDetector.getInstance().getPitch(data);
 
 
             //copying the data to double buffer for FFT processing
-            double[] processing_buffer = new double[2 * data.length];
+            double[] processingBuffer = new double[2 * data.length];
             for (int j = 0; j < data.length; j++) {
-                processing_buffer[j] = data[j];
+                processingBuffer[j] = data[j];
             }
             for (int j = data.length; j < 2 * data.length; j++) {  //zero padding
-                processing_buffer[j] = 0;
+                processingBuffer[j] = 0;
             }
-            fft.realForward(processing_buffer);
+            fft.realForward(processingBuffer);
 
 
             //determining the maximal frequency
 
-            double maximal_sum_of_intensities = 0;
-            double maximal_frequency = 0;
+            double maximalSumOfIntensities = 0;
+            double maximalFrequency = 0;
 
             int index_range = (int) (FREQ_RANGE_FOR_POWER_SUM * ((double) data.length / SoundProcessing.SAMPLE_RATE));
-            for (int k = 0; k < processing_buffer.length / 2; k++) {
-                float current_frequency = (float) k * SoundProcessing.SAMPLE_RATE / data.length;
-                double sum_of_intensities = 0;
+            for (int k = 0; k < processingBuffer.length / 2; k++) {
+                float currentFrequency = (float) k * SoundProcessing.SAMPLE_RATE / data.length;
+                double sumOfIntensities = 0;
                 for (int j = k - index_range; j <= k + index_range; j++) {
                     if (j >= 0 && j < data.length / 2) {
-                        int real_index = 2 * j;
-                        int imaginary_index = 2 * j + 1;
-                        double intensity = Math.sqrt(Math.pow(processing_buffer[real_index], 2) + Math.pow(processing_buffer[imaginary_index], 2));
-                        sum_of_intensities += intensity;
+                        int realIndex = 2 * j;
+                        int imaginaryIndex = 2 * j + 1;
+                        double intensity = Math.sqrt(Math.pow(processingBuffer[realIndex], 2) + Math.pow(processingBuffer[imaginaryIndex], 2));
+                        sumOfIntensities += intensity;
                     }
                 }
 
-                if (sum_of_intensities > maximal_sum_of_intensities) {
-                    maximal_sum_of_intensities = sum_of_intensities;
-                    maximal_frequency = current_frequency;
+                if (sumOfIntensities > maximalSumOfIntensities) {
+                    maximalSumOfIntensities = sumOfIntensities;
+                    maximalFrequency = currentFrequency;
                 }
             }
 
-            element.setMaxFrequency(maximal_frequency);
+            element.setMaxFrequency(maximalFrequency);
 
 
             SpectrumData spectrumData = new SpectrumData(new int[][]{{0, 500}, {500, 1500}, {1500, 3000}, {3000, 6000}, {6000, 10000}});
-            for (int k = 0; k < processing_buffer.length / 2; k++) {
-                float current_frequency = (float) k * SoundProcessing.SAMPLE_RATE / data.length;
+            for (int k = 0; k < processingBuffer.length / 2; k++) {
+                float currentFrequency = (float) k * SoundProcessing.SAMPLE_RATE / data.length;
                 int real = 2 * k;
                 int imaginary = 2 * k + 1;
-                double intensity = Math.sqrt(Math.pow(processing_buffer[real], 2) + Math.pow(processing_buffer[imaginary], 2));
-                spectrumData.addData(current_frequency, intensity);
+                double intensity = Math.sqrt(Math.pow(processingBuffer[real], 2) + Math.pow(processingBuffer[imaginary], 2));
+                spectrumData.addData(currentFrequency, intensity);
             }
             spectrumData.calculateData();
 
@@ -106,22 +107,22 @@ public class ProcessingThread implements Runnable {
             element.frequency_data = spectrumData.getSpectrumAverages();
             if (element.getPower() > SoundProcessing.POWER_THRESHOLD) {
                 //LOGGER.info("frekv podaci  "+element.getPower()+" "+GenderRecognizer.genderFromSpectrum(spectrumData.getSpectrumAverages())+" "+spectrumData);
-                double gender_component_1 = GenderRecognizer.genderFromSpectrum(spectrumData.getSpectrumAverages());
-                double a = 1 - (element.getMaxFrequency() - 500) / 700;
-                double gender_component_2 = a < 0 ? 0 : a > 1 ? 1 : a;
-                double b = 0;
+                double genderComponent1 = GenderRecognizer.genderFromSpectrum(spectrumData.getSpectrumAverages());
+                double temp = 1 - (element.getMaxFrequency() - 500) / 700;
+                double genderComponent2 = temp < 0 ? 0 : temp > 1 ? 1 : temp;
+                temp = 0;
                 if (element.getPitch() < 150) {
-                    b = 1;
+                    temp = 1;
                 } else if (element.getPitch() > 200) {
-                    b = 0;
+                    temp = 0;
                 } else {
-                    b = 1 - (element.getPitch() - 150) / 50;
+                    temp = 1 - (element.getPitch() - 150) / 50;
                 }
-                double gender_component_3 = b;
-                element.gender = (0.6 * gender_component_1 + 0.3 * gender_component_2 + 0.1 * gender_component_3);
+                double genderComponent3 = temp;
+                element.gender = (0.6 * genderComponent1 + 0.3 * genderComponent2 + 0.1 * genderComponent3);
             }
 
-            element.setPitch(min_frekv);
+            element.setPitch(minFreq);
 
             if (this.outputQueue != null) {
                 try {
@@ -130,10 +131,17 @@ public class ProcessingThread implements Runnable {
                     LOGGER.severe("Error " + e.getMessage());
                 }
             }
+            if (listener != null) {
+                listener.onUpdate(spectrumData.getSpectrumAverages());
+            }
         }
     }
 
     public void stop() {
         stop = true;
+    }
+
+    public interface OnUpdateListener{
+        void onUpdate(double[] soundData);
     }
 }
