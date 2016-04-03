@@ -2,24 +2,36 @@ package hr.picsona;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
+import android.opengl.GLSurfaceView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
+import hr.image.CameraController;
+import hr.image.FilterCalculator;
+import hr.image.filters.PicsonaToneCurveFilter;
+import hr.image.filters.RGBNormalizationFilter;
 import hr.sound.AndroidAudioInput;
 import hr.sound.AndroidAudioOutput;
 import hr.sound.AudioInputDevice;
 import hr.sound.AudioOutputDevice;
 import hr.sound.ProcessingResult;
 import hr.sound.SoundProcessing;
+import jp.co.cyberagent.android.gpuimage.GPUImage;
+import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageFilterGroup;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -102,6 +114,11 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         return super.dispatchTouchEvent(ev);
     }*/
 
+    private GPUImage mGPUImage;
+    private GPUImageFilter mFilter;
+    private FilterCalculator mFilterCalculator;
+    private CameraController mCameraController;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -153,7 +170,42 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                 }
             }
         });
+
+        InitializeCameraControls();
     }
+
+    private void InitializeCameraControls(){
+        mFilterCalculator = new FilterCalculator();
+
+        mGPUImage = new GPUImage(this);
+
+        GLSurfaceView glSurfaceView = (GLSurfaceView)findViewById(R.id.surfaceView);
+        mGPUImage.setGLSurfaceView(glSurfaceView);
+
+        Button switchCameraButton = (Button)findViewById(R.id.buttonSwitchCamera);
+        switchCameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchCamera();
+            }
+        });
+
+        Button takePictureButton = (Button)findViewById(R.id.buttonTakePicture);
+        takePictureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                takePicture();
+            }
+        });
+
+        mCameraController = new CameraController(this, mGPUImage, glSurfaceView);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        int width = display.getWidth();
+        int height = display.getHeight();
+        mCameraController.setAreaSize(width, height);
+    }
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -215,6 +267,29 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
     @Override
     public void onFinish(ProcessingResult result) {
-        Log.e("rezultati", ""+result);
+        Log.e("rezultati", "" + result);
+        mFilter = mFilterCalculator.calculateFilter(result);
+        mGPUImage.setFilter(mFilter);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mCameraController.reSetupCamera();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mCameraController.stopCamera();
+    }
+
+    private void switchCamera(){
+        mCameraController.cycleCamera();
+    }
+
+    private void takePicture(){
+        mCameraController.takePicture();
+    }
+
 }
