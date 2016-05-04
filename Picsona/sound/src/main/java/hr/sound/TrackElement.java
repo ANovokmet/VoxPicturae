@@ -10,10 +10,8 @@ public class TrackElement {
     private double pitch = -1;
     private double power = -1;
     private double maxFrequency;
+    private double gender;  // probability of 1 means male
 
-    //test features
-    public double[] frequency_data;
-    public double gender;  // probability of 1 means male
 
     public TrackElement(short[] data, int length){
         this.data = new short[length];
@@ -57,5 +55,13 @@ public class TrackElement {
 
     public void setMaxFrequency(double maxFrequency) {
         this.maxFrequency = maxFrequency;
+    }
+
+    public double getGender() {
+        return gender;
+    }
+
+    public void setGender(double gender) {
+        this.gender = gender;
     }
 }

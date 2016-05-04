@@ -69,6 +69,23 @@ public class GenderRecognizer {
         return probability > 1 ? 1 : probability;
     }
 
+    public static double genderFromMaximalFrequency(double maxFrequency){
+        double temp = 1 - (maxFrequency - 500) / 700;
+        return temp < 0 ? 0 : temp > 1 ? 1 : temp;
+    }
+
+    public static double genderFromPitch(double pitch){
+        double temp = 0;
+        if (pitch < 150) {
+            temp = 1;
+        } else if (pitch > 200) {
+            temp = 0;
+        } else {
+            temp = 1 - (pitch - 150) / 50;
+        }
+        return temp;
+    }
+
     private static int orderOfMagnitude(double number) {
         int orderOfMagnitude = 0;
         while (number > 1) {

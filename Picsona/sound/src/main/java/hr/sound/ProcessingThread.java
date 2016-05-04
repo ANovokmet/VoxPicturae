@@ -103,23 +103,12 @@ public class ProcessingThread implements Runnable {
             }
             spectrumData.calculateData();
 
-
-            element.frequency_data = spectrumData.getSpectrumAverages();
             if (element.getPower() > SoundProcessing.POWER_THRESHOLD) {
                 //LOGGER.info("frekv podaci  "+element.getPower()+" "+GenderRecognizer.genderFromSpectrum(spectrumData.getSpectrumAverages())+" "+spectrumData);
                 double genderComponent1 = GenderRecognizer.genderFromSpectrum(spectrumData.getSpectrumAverages());
-                double temp = 1 - (element.getMaxFrequency() - 500) / 700;
-                double genderComponent2 = temp < 0 ? 0 : temp > 1 ? 1 : temp;
-                temp = 0;
-                if (element.getPitch() < 150) {
-                    temp = 1;
-                } else if (element.getPitch() > 200) {
-                    temp = 0;
-                } else {
-                    temp = 1 - (element.getPitch() - 150) / 50;
-                }
-                double genderComponent3 = temp;
-                element.gender = (0.6 * genderComponent1 + 0.3 * genderComponent2 + 0.1 * genderComponent3);
+                double genderComponent2 = GenderRecognizer.genderFromMaximalFrequency(element.getMaxFrequency());
+                double genderComponent3 = GenderRecognizer.genderFromPitch(element.getPitch());
+                element.setGender(0.6 * genderComponent1 + 0.3 * genderComponent2 + 0.1 * genderComponent3);
             }
 
             element.setPitch(minFreq);
