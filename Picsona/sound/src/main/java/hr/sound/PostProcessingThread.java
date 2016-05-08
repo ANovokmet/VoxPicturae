@@ -1,8 +1,13 @@
 package hr.sound;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
+import hr.sound.emotion.EmotionData;
+import hr.sound.emotion.EmotionRecognizer;
 
 public class PostProcessingThread implements Runnable {
 
@@ -26,6 +31,7 @@ public class PostProcessingThread implements Runnable {
         double numberOfElements = 0, weightOfElements = 0;
         float genderProbability = 0;
         int numberOfPollExecutions = 2;
+        List<Double> snaga = new LinkedList<>();
         while (true) {
             TrackElement element = null;
             try {
@@ -41,17 +47,21 @@ public class PostProcessingThread implements Runnable {
                 LOGGER.severe(e.getMessage());
             }
 
+            snaga.add(element.getPower());
             if (element.getPower() > SoundProcessing.POWER_THRESHOLD) {
                 pitchSum += element.getPitch();
                 freqSum += element.getMaxFrequency();
-                genderProbability += element.gender * element.getPower();
+                genderProbability += element.getGender() * element.getPower();
                 numberOfElements++;
                 weightOfElements += element.getPower();
             }
         }
+
+        EmotionData emotionData = EmotionRecognizer.emotionFromSpeech(snaga);
+
         LOGGER.info("average pitch " + pitchSum / numberOfElements + " " + freqSum / numberOfElements + " " + genderProbability / weightOfElements);
         if (listener != null) {
-            listener.onFinish(new ProcessingResult(genderProbability / weightOfElements, pitchSum / numberOfElements, freqSum / numberOfElements));
+            listener.onFinish(new ProcessingResult(genderProbability / weightOfElements, pitchSum / numberOfElements, freqSum / numberOfElements, emotionData));
         }
     }
 
@@ -63,7 +73,8 @@ public class PostProcessingThread implements Runnable {
         this.stop = true;
     }
 
-    public interface OnFinishListener{
+
+    public interface OnFinishListener {
         void onFinish(ProcessingResult result);
     }
 }

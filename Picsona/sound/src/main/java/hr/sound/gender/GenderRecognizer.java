@@ -24,13 +24,13 @@ public class GenderRecognizer {
         if (classes.size() <= 1) {
             return 0.5;  //we can't estimate with only one class
         }
-        double sumation = 0;
-        for (int i = 0; i < spectrumData.length; i++) {
-            sumation += spectrumData[i];
+        double summation = 0;
+        for (double aSpectrumData : spectrumData) {
+            summation += aSpectrumData;
         }
         double[] coeffitients = new double[spectrumData.length];
         for (int i = 0; i < spectrumData.length; i++) {
-            coeffitients[i] = spectrumData[i] / sumation;
+            coeffitients[i] = spectrumData[i] / summation;
         }
         List<Integer> keys = new ArrayList<>(classes.keySet());
 
@@ -67,6 +67,23 @@ public class GenderRecognizer {
         }
         probability = probability < 0 ? 0 : probability;
         return probability > 1 ? 1 : probability;
+    }
+
+    public static double genderFromMaximalFrequency(double maxFrequency) {
+        double temp = 1 - (maxFrequency - 500) / 700;
+        return temp < 0 ? 0 : temp > 1 ? 1 : temp;
+    }
+
+    public static double genderFromPitch(double pitch) {
+        double temp;
+        if (pitch < 150) {
+            temp = 1;
+        } else if (pitch > 200) {
+            temp = 0;
+        } else {
+            temp = 1 - (pitch - 150) / 50;
+        }
+        return temp;
     }
 
     private static int orderOfMagnitude(double number) {
