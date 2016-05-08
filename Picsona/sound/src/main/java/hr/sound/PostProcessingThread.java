@@ -1,8 +1,5 @@
 package hr.sound;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -50,8 +47,6 @@ public class PostProcessingThread implements Runnable {
                 LOGGER.severe(e.getMessage());
             }
 
-            /*LOGGER.info("prica "+ (element.getPower() > SoundProcessing.POWER_THRESHOLD ? "govori " : "tisina  ") +
-                    element.getMaxFrequency() + " " + element.getPower()); */
             snaga.add(element.getPower());
             if (element.getPower() > SoundProcessing.POWER_THRESHOLD) {
                 pitchSum += element.getPitch();
@@ -59,7 +54,6 @@ public class PostProcessingThread implements Runnable {
                 genderProbability += element.getGender() * element.getPower();
                 numberOfElements++;
                 weightOfElements += element.getPower();
-                //LOGGER.info("podaci o spektru "+ Arrays.toString(element.frequency_data));
             }
         }
 
@@ -80,10 +74,7 @@ public class PostProcessingThread implements Runnable {
     }
 
 
-
-
-
-    public interface OnFinishListener{
+    public interface OnFinishListener {
         void onFinish(ProcessingResult result);
     }
 }

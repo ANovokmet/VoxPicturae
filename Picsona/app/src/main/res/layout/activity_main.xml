@@ -78,7 +78,8 @@
                 android:id="@+id/buttonTakePicture"
                 android:layout_alignTop="@+id/buttonSwitchCamera"
                 android:layout_toLeftOf="@+id/buttonSwitchCamera"
-                android:layout_toStartOf="@+id/buttonSwitchCamera" />
+                android:layout_toStartOf="@+id/buttonSwitchCamera"
+                android:visibility="visible" />
 
             <Button
                 style="?android:attr/buttonStyleSmall"
@@ -89,7 +90,33 @@
                 android:layout_alignTop="@+id/recordSound"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/intensityBar"
+                android:progress="0"
+                android:max="5000"
+                android:visibility="gone"
+                android:layout_alignBaseline="@+id/recordSound"
+                android:layout_alignParentRight="true"
+                android:layout_toRightOf="@+id/recordSound" />
+
         </RelativeLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="193dp"
+            android:text="Debug data"
+            android:id="@+id/debugView"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="left|top" />
 
     </FrameLayout>
 

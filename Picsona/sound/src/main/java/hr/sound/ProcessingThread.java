@@ -20,8 +20,10 @@ public class ProcessingThread implements Runnable {
     private BlockingQueue<TrackElement> outputQueue;
     private boolean stop = false;
     private OnUpdateListener listener;
+    private static long listenerLastUpdate = 0;
 
-    private int FREQ_RANGE_FOR_POWER_SUM = 50;
+    private static int FREQ_RANGE_FOR_POWER_SUM = 50;
+    private static int LISTENER_UPDATE_MSEC = 100;
 
     public ProcessingThread(BlockingQueue<TrackElement> inputQueue, BlockingQueue<TrackElement> outputQueue, OnUpdateListener listener) {
         if (inputQueue == null) {
@@ -53,6 +55,8 @@ public class ProcessingThread implements Runnable {
             element.setPower(SignalAverage.RMSsignalAverage(data));
 
             int minFreq = (int) PitchDetector.getInstance().getPitch(data);
+
+            element.setPitch(minFreq);
 
 
             //copying the data to double buffer for FFT processing
@@ -104,14 +108,11 @@ public class ProcessingThread implements Runnable {
             spectrumData.calculateData();
 
             if (element.getPower() > SoundProcessing.POWER_THRESHOLD) {
-                //LOGGER.info("frekv podaci  "+element.getPower()+" "+GenderRecognizer.genderFromSpectrum(spectrumData.getSpectrumAverages())+" "+spectrumData);
                 double genderComponent1 = GenderRecognizer.genderFromSpectrum(spectrumData.getSpectrumAverages());
                 double genderComponent2 = GenderRecognizer.genderFromMaximalFrequency(element.getMaxFrequency());
                 double genderComponent3 = GenderRecognizer.genderFromPitch(element.getPitch());
                 element.setGender(0.6 * genderComponent1 + 0.3 * genderComponent2 + 0.1 * genderComponent3);
             }
-
-            element.setPitch(minFreq);
 
             if (this.outputQueue != null) {
                 try {
@@ -120,8 +121,9 @@ public class ProcessingThread implements Runnable {
                     LOGGER.severe("Error " + e.getMessage());
                 }
             }
-            if (listener != null) {
-                listener.onUpdate(spectrumData.getSpectrumAverages());
+            if (listener != null && (System.currentTimeMillis() - listenerLastUpdate) > LISTENER_UPDATE_MSEC) {
+                listener.onUpdate(spectrumData.getSpectrumAverages(), element.getPower());
+                listenerLastUpdate = System.currentTimeMillis();
             }
         }
     }
@@ -130,7 +132,7 @@ public class ProcessingThread implements Runnable {
         stop = true;
     }
 
-    public interface OnUpdateListener{
-        void onUpdate(double[] soundData);
+    public interface OnUpdateListener {
+        void onUpdate(double[] soundData, double power);
     }
 }

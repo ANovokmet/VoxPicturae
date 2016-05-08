@@ -46,6 +46,10 @@ public class EmotionRecognizer {
             }
         }
 
+        if (speechPeriodLengths.isEmpty()) {
+            return new EmotionData();
+        }
+
         LOGGER.info("prvih nekoliko elemanata " + firstSpeechPeriod);
 
         int minimalPeriodLength = listMinimum(speechPeriodLengths);
@@ -72,6 +76,9 @@ public class EmotionRecognizer {
 
         double speechPeriodLengthsAvg = sumOfSpeechPeriodLengths / speechPeriodLengths.size();
         double silencePeriodLengthsAvg = sumOfSilencePeriodLengths / silencePeriodLengths.size();
+        if (Double.isNaN(silencePeriodLengthsAvg)) {
+            silencePeriodLengthsAvg = 0;
+        }
         LOGGER.info("govor tisina " + speechPeriodLengths + " " + silencePeriodLengths + " " + speechPeriodLengthsAvg + " " + silencePeriodLengthsAvg);
 
         double periodLengthsDiff = 0.15 * (speechPeriodLengthsAvg + silencePeriodLengthsAvg);
@@ -93,24 +100,33 @@ public class EmotionRecognizer {
         }
 
         if (standardDeviation > 3600) {
-            angerProbability += 0.6666;
+            angerProbability += 0.6666 * neutralSadnessDampening;
         } else if (standardDeviation < 1600) {
             sadnessProbability += 0.5 * neutralSadnessDampening;
         } else {
             //expected possible sadness range is 1000-2600, lower than 1600 is certain that is sadness
             double sadnessLocalProbability = (1000 - standardDeviation + 1600) / 1000 * 0.5;
-            sadnessProbability += sadnessLocalProbability < 0 ? 0 : sadnessLocalProbability;
+            sadnessProbability += sadnessLocalProbability < 0 ? 0 : sadnessLocalProbability * neutralSadnessDampening;
 
             double firstSpeak = listMaximum(firstSpeechPeriod);
             double tenseEmotionsLocalProbability = firstSpeak / (harmonicMean * 10);
             double angerAdjustment = tenseEmotionsLocalProbability > 0.5 ? (1.5 * tenseEmotionsLocalProbability - 0.25) : 0.5;
-            double happinessAdjustment = tenseEmotionsLocalProbability < 0.5 ? (-1.5 * (1 - tenseEmotionsLocalProbability) + 1.25) : 0.5;
+            double happinessAdjustment = tenseEmotionsLocalProbability < 0.5 ? (-1.5 * tenseEmotionsLocalProbability + 1.25) : 0.5;
             angerProbability += tenseEmotionsLocalProbability * 0.6666 * angerAdjustment;
             happinessProbability += (1 - tenseEmotionsLocalProbability) * 0.6666 * happinessAdjustment;
         }
 
         LOGGER.info("calculated a h s " + angerProbability + " " + happinessProbability + " " + sadnessProbability);
-        return new EmotionData(angerProbability, sadnessProbability, happinessProbability, harmonicMean);
+        return new EmotionData(adjustProbability(angerProbability), adjustProbability(sadnessProbability), adjustProbability(happinessProbability), averageMean(elementPowers) / 2000);
+    }
+
+    private static double adjustProbability(double probability) {
+        if (probability > 1) {
+            return 1;
+        } else if (probability < 0) {
+            return 0;
+        }
+        return probability;
     }
 
     private static double harmonicMean(List<Double> data) {
@@ -123,6 +139,18 @@ public class EmotionRecognizer {
             }
         }
         return numberOfElements / sum;
+    }
+
+    private static double averageMean(List<Double> data) {
+        double sum = 0;
+        double numberOfElements = 0;
+        for (double broj : data) {
+            if (broj > SoundProcessing.POWER_THRESHOLD) {
+                sum += broj;
+                numberOfElements++;
+            }
+        }
+        return sum / numberOfElements;
     }
 
     private static double standardDeviation(List<Double> data, double threshold) {
@@ -162,6 +190,15 @@ public class EmotionRecognizer {
             if (list.get(i) > maximum) {
                 maximum = list.get(i);
             }
+        }
+        int br = 0;
+        for (double element : list) {
+            if (maximum != element && element > maximum * 0.9) {
+                br++; //counting the local maximums
+            }
+        }
+        if (br < 2) {  //maximum is just a spike in intensity
+            return maximum * 0.7;
         }
         return maximum;
     }

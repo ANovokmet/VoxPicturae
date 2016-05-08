@@ -8,12 +8,19 @@ public class ProcessingResult {
     private double pitch;
     private double maxFrequency;
     private EmotionData emotionData;
+    private Status status;
 
     public ProcessingResult(double genderProbability, double pitch, double maxFrequency, EmotionData emotionData){
+        this.emotionData = emotionData;
+        double checkSum = genderProbability + pitch + maxFrequency;
+        if(Double.isNaN(checkSum)){
+            status = Status.STATUS_NOT_ENOUGH_DATA;
+            return;
+        }
         this.genderProbability = genderProbability;
         this.pitch = pitch;
         this.maxFrequency = maxFrequency;
-        this.emotionData = emotionData;
+        status = Status.STATUS_OK;
     }
 
     public double getGenderProbability() {
@@ -39,6 +46,16 @@ public class ProcessingResult {
                 ", pitch=" + pitch +
                 ", maxFrequency=" + maxFrequency +
                 ", emotionData=" + emotionData +
+                ", status=" + status +
                 '}';
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public enum Status{
+        STATUS_OK,
+        STATUS_NOT_ENOUGH_DATA
     }
 }

@@ -68,14 +68,14 @@ public class SoundProcessing implements ProcessingThread.OnUpdateListener, PostP
     }
 
     @Override
-    public void onUpdate(double[] soundData) {
+    public void onUpdate(double[] soundData, double power) {
         if(listener != null){
-            listener.onUpdate(soundData);
+            listener.onUpdate(soundData, power);
         }
     }
 
     public interface OnProcessingUpdateListener{
-        void onUpdate(double[] soundData);
+        void onUpdate(double[] soundData, double power);
         void onFinish(ProcessingResult result);
     }
 }
