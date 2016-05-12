@@ -95,8 +95,8 @@ public class CameraController implements BaseCameraController {
     private Camera.PictureCallback pictureCallback = new Camera.PictureCallback(){
         @Override
         public void onPictureTaken(byte[] data,final Camera camera) {
-            //TODO: MERGE PHOTO WITH OVERLAY AND FRAME
-            final File pictureFile = PictureFileManager.getSaveFile();
+            /*final File pictureFile = PictureFileManager.getSaveFile();
+>>>>>>> preview optimizations
 
             if(pictureFile == null){
                 Log.d("Picture Callback error","Picture file was not created");
@@ -113,8 +113,10 @@ public class CameraController implements BaseCameraController {
                 Log.d("Picture Callback error", "Error accessing file: " + e.getMessage());
             }
 
-            data = null;
-            Bitmap bitmap = BitmapFactory.decodeFile(pictureFile.getAbsolutePath());
+            data = null;*/
+            //Bitmap bitmap = BitmapFactory.decodeFile(pictureFile.getAbsolutePath());
+            int format = camera.getParameters().getPictureFormat();
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             final GLSurfaceView view = mGlSurfaceView;
             view.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
             mGPUImage.saveToPicturesWithOverlay(bitmap, mOverlayBitmap, getImageNeededRotation(), mFlipHorizontal, "PicSona",
@@ -123,7 +125,7 @@ public class CameraController implements BaseCameraController {
 
                         @Override
                         public void onPictureSaved(final Uri uri) {
-                            pictureFile.delete();
+                            //pictureFile.delete();
                             camera.startPreview();
                             view.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
                         }

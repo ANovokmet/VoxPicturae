@@ -483,6 +483,10 @@ public class GPUImage {
         }
     }
 
+    private void setupBufferedPreview(final Camera camera){
+
+    }
+
     @Deprecated
     private class SaveTask extends AsyncTask<Void, Void, Void> {
 

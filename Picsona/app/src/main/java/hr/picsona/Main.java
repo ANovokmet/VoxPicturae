@@ -9,6 +9,19 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.opengl.GLSurfaceView;
+import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -24,6 +37,7 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import hr.image.CameraController;
 import hr.image.FakeFilterCalculator;
@@ -53,6 +67,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
      * user interaction before hiding the system UI.
      */
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+
+    final int ACTIVITY_CHOOSE_FILE = 1;
 
     /**
      * Some older devices needs a small delay between UI widget updates
@@ -178,6 +194,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     processing = new SoundProcessing(device, null, 44100);
                     processing.setListener(Main.this);
                     processing.start();
+                    mGPUImage.deleteImage();
+                    mCameraController.reSetupCamera();
                     recording = true;
                 } else {
                     ((Button) v).setText("Start recording");
@@ -187,6 +205,19 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     takePictureButton.setVisibility(View.VISIBLE);
                     recording = false;
                 }
+            }
+        });
+
+        findViewById(R.id.loadImage).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent chooseFile;
+                Intent chooserWrapper;
+                chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
+                chooseFile.setType("image/*");
+                chooserWrapper = Intent.createChooser(chooseFile, "Choose a picture");
+                startActivityForResult(chooserWrapper, ACTIVITY_CHOOSE_FILE);
             }
         });
 
@@ -234,6 +265,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         Display display = getWindowManager().getDefaultDisplay();
         int width = display.getWidth();
         int height = display.getHeight();
+
         mCameraController.setAreaSize(width * 2, height * 2);
 
         GPUImageView gpuImageView = (GPUImageView)findViewById(R.id.gpuimageView);
@@ -409,7 +441,49 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         mCameraController.stopCamera();
     }
 
-    private void switchCamera() {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case ACTIVITY_CHOOSE_FILE:
+                Uri uri = data.getData();
+                String path = uri.toString();
+                Log.e("put do slike", path);
+                if(path.startsWith("content")){
+                    try {
+                        path = getRealPathFromURI(uri);
+                    }catch(Exception e){
+                        Toast.makeText(this, "Supported format is JPG", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                }
+                Log.e("put do slike2", path);
+                if(!path.endsWith(".jpg") && !path.endsWith(".jpeg")) {
+                    Toast.makeText(this, "Supported format is JPG", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                //mCameraController.stopCamera();  //napraviti "pause" camera
+                mGPUImage.setImage(uri);
+                break;
+            default:
+                Toast.makeText(this, "Image loading error", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public String getRealPathFromURI(Uri contentUri) throws Exception{
+
+        String [] proj={MediaStore.Images.Media.DATA};
+        Cursor cursor = this.getContentResolver().query( contentUri,
+                proj,
+                null,
+                null,
+                null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+
+        return cursor.getString(column_index);
+    }
+
+    private void switchCamera(){
         mCameraController.cycleCamera();
     }
 

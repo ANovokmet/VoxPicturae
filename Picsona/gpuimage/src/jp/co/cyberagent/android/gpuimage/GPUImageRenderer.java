@@ -19,6 +19,7 @@ package jp.co.cyberagent.android.gpuimage;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
@@ -151,6 +152,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         if (mGLRgbBuffer == null) {
             mGLRgbBuffer = IntBuffer.allocate(previewSize.width * previewSize.height);
         }
+
         if (mRunOnDraw.isEmpty()) {
             runOnDraw(new Runnable() {
                 @Override
@@ -159,7 +161,6 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
                             mGLRgbBuffer.array());
                     mGLTextureId = OpenGlUtils.loadTexture(mGLRgbBuffer, previewSize, mGLTextureId);
                     camera.addCallbackBuffer(data);
-
                     if (mImageWidth != previewSize.width) {
                         mImageWidth = previewSize.width;
                         mImageHeight = previewSize.height;
@@ -177,9 +178,23 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
                 int[] textures = new int[1];
                 GLES20.glGenTextures(1, textures, 0);
                 mSurfaceTexture = new SurfaceTexture(textures[0]);
+                final Size previewSize = camera.getParameters().getPreviewSize();
+                Camera.Parameters params = camera.getParameters();
+                params.setPreviewFormat(ImageFormat.NV21);
+                camera.setParameters(params);
+                final int imageFormat = camera.getParameters().getPreviewFormat();
+                int bufferSize = 0;
+                int yStride   = (int) Math.ceil(previewSize.width / 16.0) * 16;
+                int uvStride  = (int) Math.ceil( (yStride / 2) / 16.0) * 16;
+                int ySize     = yStride * previewSize.height;
+                int uvSize    = uvStride * previewSize.height / 2;
+                bufferSize      = ySize + uvSize * 2;
                 try {
                     camera.setPreviewTexture(mSurfaceTexture);
-                    camera.setPreviewCallback(GPUImageRenderer.this);
+                    //camera.setPreviewCallback(GPUImageRenderer.this);
+                    camera.setPreviewCallbackWithBuffer(GPUImageRenderer.this);
+                    byte[] buffer = new byte[bufferSize];
+                    camera.addCallbackBuffer(buffer);
                     camera.startPreview();
                 } catch (IOException e) {
                     e.printStackTrace();
