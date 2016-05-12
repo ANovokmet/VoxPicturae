@@ -1,0 +1,145 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_dialog"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textViewRed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="7dp"
+        android:text="Red" />
+
+    <SeekBar
+        android:id="@+id/seekBarRed1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/textViewRed"
+        android:layout_marginTop="7dp"
+        android:max="128"
+        android:progress="64"  />
+
+    <SeekBar
+        android:id="@+id/seekBarRed2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/seekBarRed1"
+        android:layout_marginTop="7dp"
+        android:max="128"
+        android:progress="64" />
+
+    <TextView
+        android:id="@+id/textViewGreen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="7dp"
+        android:layout_below="@+id/seekBarRed2"
+        android:text="Green" />
+
+    <SeekBar
+        android:id="@+id/seekBarGreen1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seekBarBlue1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:max="128"
+        android:progress="64" />
+
+    <SeekBar
+        android:id="@+id/seekBarGreen2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/seekBarGreen1"
+        android:layout_marginTop="7dp"
+        android:max="128"
+        android:progress="64"/>
+
+    <TextView
+        android:id="@+id/textViewBlue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="7dp"
+        android:text="Blue" />
+
+    <SeekBar
+        android:id="@+id/seekBarBlue1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seekBarComposite1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:max="128"
+        android:progress="64" />
+
+    <SeekBar
+        android:id="@+id/seekBarBlue2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seekBarGreen2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:max="128"
+        android:progress="64" />
+
+    <TextView
+        android:id="@+id/textViewComposite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Composite"
+        android:layout_below="@+id/seekBarRed2"
+        android:layout_alignLeft="@+id/textViewRed"
+        android:layout_alignStart="@+id/textViewRed" />
+
+    <SeekBar
+        android:id="@+id/seekBarComposite1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:max="128"
+        android:progress="64"  />
+
+    <SeekBar
+        android:id="@+id/seekBarComposite2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:max="128"
+        android:progress="64"  />
+
+    <TextView
+        android:id="@+id/textViewContrast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Contrast"
+        android:layout_above="@+id/seekBarContrast"
+        android:layout_alignRight="@+id/textViewGreen"
+        android:layout_alignEnd="@+id/textViewGreen" />
+
+    <SeekBar
+        android:id="@+id/seekBarContrast"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/seekBarComposite2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:max="100"
+        android:progress="50" />
+
+
+</LinearLayout>

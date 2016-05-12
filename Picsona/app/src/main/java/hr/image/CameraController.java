@@ -59,6 +59,13 @@ public class CameraController implements BaseCameraController {
         screenAspectRatio = (float)height / width;
     }
 
+    public int getAreaWidth(){
+        return screenWidth;
+    }
+    public int getAreaHeight(){
+        return screenHeight;
+    }
+
     @Override
     public void takePicture() {
         if (mParameters.getFocusMode().equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
@@ -76,15 +83,19 @@ public class CameraController implements BaseCameraController {
     }
 
     private void doCapture(){
-        mParameters.setRotation(getDisplayOrientation());
+        mParameters.setRotation(getDisplayOrientation());//nema utjecaja >>gpuimage.java
         setupPictureSize();
         mCamera.setParameters(mParameters);
         mCamera.takePicture(null, null, pictureCallback);
     }
 
+    public Bitmap mOverlayBitmap;
+    private boolean mFlipHorizontal;
+
     private Camera.PictureCallback pictureCallback = new Camera.PictureCallback(){
         @Override
         public void onPictureTaken(byte[] data,final Camera camera) {
+            //TODO: MERGE PHOTO WITH OVERLAY AND FRAME
             final File pictureFile = PictureFileManager.getSaveFile();
 
             if(pictureFile == null){
@@ -106,8 +117,8 @@ public class CameraController implements BaseCameraController {
             Bitmap bitmap = BitmapFactory.decodeFile(pictureFile.getAbsolutePath());
             final GLSurfaceView view = mGlSurfaceView;
             view.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-            mGPUImage.saveToPictures(bitmap, "PicSona",
-                    "PicSona_"+PictureFileManager.createFileName() + ".jpg",
+            mGPUImage.saveToPicturesWithOverlay(bitmap, mOverlayBitmap, getImageNeededRotation(), mFlipHorizontal, "PicSona",
+                    "PicSona_" + PictureFileManager.createFileName() + ".jpg",
                     new GPUImage.OnPictureSavedListener() {
 
                         @Override
@@ -157,8 +168,9 @@ public class CameraController implements BaseCameraController {
         //flip horizontal
         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
         Camera.getCameraInfo(mCurrentCameraId, cameraInfo);
-        boolean flipHorizontal = cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT;
-        mGPUImage.setUpCamera(mCamera, getCameraDisplayOrientation(), flipHorizontal, false);
+        mFlipHorizontal = cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT;
+        mGPUImage.setUpCamera(mCamera, getCameraDisplayOrientation(), mFlipHorizontal, false);
+
     }
 
     private void setupPreviewSize() {
@@ -169,8 +181,41 @@ public class CameraController implements BaseCameraController {
 
     private void setupPictureSize() {
         List<Camera.Size> sizes = mParameters.getSupportedPictureSizes();
-        Camera.Size optimalPreviewSize = getOptimalSize(sizes);
+        Camera.Size optimalPreviewSize = getOptimalSize(sizes); //TODO: LOSE ZA PRAVU KAMERU
+
         mParameters.setPictureSize(optimalPreviewSize.width, optimalPreviewSize.height);
+
+        mOverlayBitmap = mOverlayGenerator.reCreateOverlayForSize(optimalPreviewSize.width, optimalPreviewSize.height);
+    }
+
+    private Camera.Size getBiggestSize(List<Camera.Size> sizes){
+        Camera.Size optimalSizeUnrationed = null;
+        Camera.Size optimalSizeRationed = null;
+
+        int biggestWidth = 0;
+
+        for(Camera.Size size : sizes){
+            float previewRatio = (float) size.width / size.height;
+
+
+            if(biggestWidth < size.width){
+                biggestWidth = size.width;
+
+                if(previewRatio == screenAspectRatio){
+                    optimalSizeRationed = size;
+                }
+                else{
+                    optimalSizeUnrationed = size;
+                }
+            }
+        }
+
+        if(optimalSizeRationed != null){
+            return optimalSizeRationed;
+        }
+        else{
+            return optimalSizeUnrationed;
+        }
     }
 
 
@@ -228,9 +273,11 @@ public class CameraController implements BaseCameraController {
         int rotation = getDisplayOrientation();
 
         if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT){
+            Log.d("cdo",""+(cameraInfo.orientation + rotation) % 360);
             return (cameraInfo.orientation + rotation) % 360;
         }
         else{
+            Log.d("cdo",""+((cameraInfo.orientation - rotation + 360) % 360));
             return (cameraInfo.orientation - rotation + 360) % 360;
         }
     }
@@ -244,6 +291,31 @@ public class CameraController implements BaseCameraController {
             case Surface.ROTATION_180: rotation = 180; break;
             case Surface.ROTATION_270: rotation = 270; break;
         }
+        Log.d("gdo", "" + rotation);
         return rotation;
+    }
+
+    /**
+     * empirical data
+     */
+    private int getImageNeededRotation(){
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        Camera.getCameraInfo(mCurrentCameraId, cameraInfo);
+
+        int rotation = getDisplayOrientation();
+
+        if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT){
+            rotation = (cameraInfo.orientation + rotation + 180) % 360;
+        }
+        else{
+            rotation = (cameraInfo.orientation - rotation + 360) % 360;
+        }
+        return rotation;
+    }
+
+
+    OverlayGenerator mOverlayGenerator;
+    public void setOverlayGenerator(OverlayGenerator overlayGenerator) {
+        mOverlayGenerator = overlayGenerator;
     }
 }

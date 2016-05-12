@@ -22,6 +22,12 @@
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
+    <jp.co.cyberagent.android.gpuimage.GPUImageView
+        android:id="@+id/gpuimageView"
+        android:layout_width="match_parent"
+        android:layout_height="435dp"
+        android:layout_gravity="right|top" />
+
     <android.opengl.GLSurfaceView
         android:id="@+id/surfaceView"
         android:layout_width="match_parent"
@@ -58,6 +64,17 @@
             android:layout_width="match_parent"
             android:layout_height="211dp"
             android:layout_gravity="center_horizontal|bottom">
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edit params"
+                android:id="@+id/buttonEditParams"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:backgroundTint="#ffc107"
+                android:textColor="#9c27b0" />
 
             <Button
                 android:layout_width="wrap_content"

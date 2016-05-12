@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
@@ -372,6 +373,8 @@ public class GPUImage {
         saveToPictures(mCurrentBitmap, folderName, fileName, listener);
     }
 
+
+
     /**
      * Deprecated: Please use
      * {@link GPUImageView#saveToPictures(String, String, jp.co.cyberagent.android.gpuimage.GPUImageView.OnPictureSavedListener)}
@@ -391,6 +394,11 @@ public class GPUImage {
     public void saveToPictures(final Bitmap bitmap, final String folderName, final String fileName,
             final OnPictureSavedListener listener) {
         new SaveTask(bitmap, folderName, fileName, listener).execute();
+    }
+
+    public void saveToPicturesWithOverlay(final Bitmap bitmap, final Bitmap overlayBitmap, final int orientation, final boolean flipHorizontally, final String folderName, final String fileName,
+                                          final OnPictureSavedListener listener) {
+        new SaveWithOverlayTask(bitmap, overlayBitmap, orientation, flipHorizontally, folderName, fileName, listener).execute();
     }
 
     /**
@@ -413,6 +421,53 @@ public class GPUImage {
             Display display = windowManager.getDefaultDisplay();
             return display.getWidth();
         }
+    }
+
+    public Bitmap getBitmapWithFilterAppliedAndRotation(final Bitmap bitmap, final int rotation, final boolean flipHorizontally) {
+        if (mGlSurfaceView != null) {
+            mRenderer.deleteImage();
+            mRenderer.runOnDraw(new Runnable() {
+
+                @Override
+                public void run() {
+                    synchronized(mFilter) {
+                        mFilter.destroy();
+                        mFilter.notify();
+                    }
+                }
+            });
+            synchronized(mFilter) {
+                requestRender();
+                try {
+                    mFilter.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        GPUImageRenderer renderer = new GPUImageRenderer(mFilter);
+
+        Rotation rot = Rotation.fromInt(rotation);
+
+        renderer.setRotation(rot,//USED TO BE Rotation.NORMAL
+                flipHorizontally, mRenderer.isFlippedVertically());
+        renderer.setScaleType(ScaleType.CENTER_CROP);
+        PixelBuffer buffer = new PixelBuffer(bitmap.getHeight(), bitmap.getWidth());
+        buffer.setRenderer(renderer);
+        renderer.setImageBitmap(bitmap, false);
+        Bitmap result = buffer.getBitmap();
+        mFilter.destroy();
+        renderer.deleteImage();
+        buffer.destroy();
+
+        mRenderer.setFilter(mFilter);
+        if (mCurrentBitmap != null) {
+            mRenderer.setImageBitmap(mCurrentBitmap, false);
+        }
+        requestRender();
+
+        return result;
     }
 
     private int getOutputHeight() {
@@ -482,6 +537,89 @@ public class GPUImage {
                 e.printStackTrace();
             }
         }
+    }
+
+    //TODO: EXTRACT AS NEW CLASS
+    private class SaveWithOverlayTask extends AsyncTask<Void, Void, Void> {
+
+        private final Bitmap mBitmap;
+        private final String mFolderName;
+        private final String mFileName;
+        private final OnPictureSavedListener mListener;
+        private final Handler mHandler;
+
+        private final Bitmap mOverlayBitmap;
+        private final int mOrientation;
+        private final boolean flipHorizontally;
+
+        public SaveWithOverlayTask(final Bitmap bitmap, final Bitmap overlayBitmap, final int orientation, final boolean flipHorizontally, final String folderName, final String fileName,
+                                   final OnPictureSavedListener listener) {
+            mOverlayBitmap = overlayBitmap;
+            mBitmap = bitmap;
+            mFolderName = folderName;
+            mFileName = fileName;
+            mListener = listener;
+            mHandler = new Handler();
+
+            mOrientation = orientation;
+            this.flipHorizontally = flipHorizontally;
+        }
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+            Bitmap result = getBitmapWithFilterAppliedAndRotation(mBitmap, mOrientation, flipHorizontally);
+
+            //TODO: MERGING FRAME AND EMOJIS
+            if(mOverlayBitmap.getWidth() != result.getWidth()){
+                result = OverlayBitmap(result, Bitmap.createScaledBitmap(mOverlayBitmap, result.getWidth(), result.getHeight(), false));
+            }
+            else{
+                result = OverlayBitmap(result, mOverlayBitmap);
+            }
+            saveImage(mFolderName, mFileName, result);
+            return null;
+        }
+
+        private void saveImage(final String folderName, final String fileName, final Bitmap image) {
+            File path = Environment
+                    .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            File file = new File(path, folderName + "/" + fileName);
+            try {
+                file.getParentFile().mkdirs();
+                image.compress(CompressFormat.JPEG, 80, new FileOutputStream(file));
+                MediaScannerConnection.scanFile(mContext,
+                        new String[] {
+                                file.toString()
+                        }, null,
+                        new MediaScannerConnection.OnScanCompletedListener() {
+                            @Override
+                            public void onScanCompleted(final String path, final Uri uri) {
+                                if (mListener != null) {
+                                    mHandler.post(new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            mListener.onPictureSaved(uri);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /*
+    ista implementacija postoji u bitmaputils
+     */
+    public static Bitmap OverlayBitmap(Bitmap bmp1, Bitmap bmp2) {
+        Bitmap bmOverlay = Bitmap.createBitmap(bmp1.getWidth(), bmp1.getHeight(), bmp1.getConfig());
+        Canvas canvas = new Canvas(bmOverlay);
+        canvas.drawBitmap(bmp1, new Matrix(), null);
+        canvas.drawBitmap(bmp2, 0, 0, null);
+        return bmOverlay;
     }
 
     public interface OnPictureSavedListener {
