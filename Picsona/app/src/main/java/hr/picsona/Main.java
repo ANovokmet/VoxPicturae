@@ -3,37 +3,24 @@ package hr.picsona;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-<<<<<<< HEAD
+
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
-=======
->>>>>>> refs/remotes/origin/master
+
 import android.content.Intent;
 import android.database.Cursor;
-<<<<<<< HEAD
+
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-=======
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.net.Uri;
-import android.opengl.GLSurfaceView;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.provider.MediaStore;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
->>>>>>> refs/remotes/origin/master
+
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -240,7 +227,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         int width = display.getWidth();
         int height = display.getHeight();
 
-<<<<<<< HEAD
         mCameraController.setDesiredPreviewSize(height, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
         mCameraController.setDesiredPictureSize(height, width);
 
@@ -248,14 +234,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
         mOverlayGenerator = new OverlayGenerator(this);
 
-=======
-        mCameraController.setAreaSize(width / 2, height / 2);
-
-        GPUImageView gpuImageView = (GPUImageView) findViewById(R.id.gpuimageView);
-
-        OverlayGenerator og = new OverlayGenerator(this, mCameraController.getAreaWidth(), mCameraController.getAreaHeight(), 4, 5);
-        Bitmap bitmap = og.createOverlay();
->>>>>>> refs/remotes/origin/master
 
 
         mCameraController.setOverlayGenerator(mOverlayGenerator);
@@ -274,13 +252,10 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
 
     View parameterViewLayout;
-<<<<<<< HEAD
+
     SeekBar genderSB, pitchSB, maxFreqSB, angerSB, sadnessSB, happinessSB, intensitySB;
     int gender,pitch,maxFreq,anger,sadness,happiness,intensity;
-=======
-    SeekBar redSB1, redSB2, greenSB1, greenSB2, blueSB1, blueSB2, compositeSB1, compositeSB2, contrastSB;
-    int red1, red2, green1, green2, blue1, blue2, composite1, composite2, contrast;
->>>>>>> refs/remotes/origin/master
+
 
     AlertDialog.Builder popDialog;
 
@@ -297,7 +272,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         intensitySB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarIntensity);
     }
 
-<<<<<<< HEAD
     private void getProgresses(){
         gender = genderSB.getProgress();
         pitch = pitchSB.getProgress();
@@ -306,18 +280,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         sadness = sadnessSB.getProgress();
         happiness = happinessSB.getProgress();
         intensity = intensitySB.getProgress();
-=======
-    private void getProgresses() {
-        red1 = redSB1.getProgress();
-        red2 = redSB2.getProgress();
-        green1 = greenSB1.getProgress();
-        green2 = greenSB2.getProgress();
-        blue1 = blueSB1.getProgress();
-        blue2 = blueSB2.getProgress();
-        composite1 = compositeSB1.getProgress();
-        composite2 = compositeSB2.getProgress();
-        contrast = contrastSB.getProgress();
->>>>>>> refs/remotes/origin/master
     }
 
     private void showEditParamsDialog() {
@@ -341,11 +303,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
                     getProgresses();
 
-<<<<<<< HEAD
                     mFilter = fkcalculator.calculateFilter((float)gender/100, (float)pitch, (float)maxFreq, (float)anger/100, (float)sadness/100, (float)happiness/100, (float)intensity/400);
-=======
-                    mFilter = fkcalculator.calculateFilter(red1, red2, green1, green2, blue1, blue2, composite1, composite2, contrast);
->>>>>>> refs/remotes/origin/master
+
                     mGPUImage.setFilter(mFilter);
                 }
             });

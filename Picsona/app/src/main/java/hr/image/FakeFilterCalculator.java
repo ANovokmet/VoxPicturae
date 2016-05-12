@@ -46,14 +46,15 @@ public class FakeFilterCalculator {
         ArrayList<GPUImageFilter> filters = new ArrayList<GPUImageFilter>();
 
         float[] min = new float[] {0.0f, 0.0f ,0.0f};
-        final float[] mid = new float[] {1.0f,1.0f,1.0f};
+        final float[] mid = new float[] {1.5f,1.5f,1.5f};
         final float[] max = new float[] {1.0f,1.0f,1.0f};
         final float[] minOut = new float[] {0.0f, 0.0f ,0.0f};
         final float[] maxOut = new float[] {1.0f,1.0f,1.0f};
 
 
         GPUImageLevelsFilter levelsFilter = new GPUImageLevelsFilter();
-
+        levelsFilter.setMin(min[0],mid[0],max[0],minOut[0],maxOut[0]);
+        filters.add(levelsFilter);
         return new GPUImageFilterGroup(filters);
     }
 
