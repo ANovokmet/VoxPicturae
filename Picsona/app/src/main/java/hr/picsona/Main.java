@@ -3,20 +3,24 @@ package hr.picsona;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
+
 import android.content.pm.ActivityInfo;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
+
+import android.content.Intent;
+import android.database.Cursor;
+
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.os.Handler;
+
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -223,25 +227,35 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         int width = display.getWidth();
         int height = display.getHeight();
 
-        mCameraController.setAreaSize(width / 2, height / 2);
+        mCameraController.setDesiredPreviewSize(height, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
+        mCameraController.setDesiredPictureSize(height, width);
 
-        GPUImageView gpuImageView = (GPUImageView) findViewById(R.id.gpuimageView);
+        mGPUImageView = (GPUImageView)findViewById(R.id.gpuimageView);
 
-        OverlayGenerator og = new OverlayGenerator(this, mCameraController.getAreaWidth(), mCameraController.getAreaHeight(), 4, 5);
-        Bitmap bitmap = og.createOverlay();
+        mOverlayGenerator = new OverlayGenerator(this);
 
-        gpuImageView.setImage(bitmap);
 
-        mCameraController.setOverlayGenerator(og);
 
+        mCameraController.setOverlayGenerator(mOverlayGenerator);
+
+        /*ArrayList<GPUImageFilter> filters = new ArrayList<GPUImageFilter>();
+        filters.add(new GPUImageContrastFilter(1.5f));
+        filters.add(new GPUImageRGBFilter(237/255.f,221/255.f,158/255.f));
+            //++levels filter
+        mGPUImage.setFilter(new GPUImageFilterGroup(filters));*/
     }
+
+    OverlayGenerator mOverlayGenerator;
+    GPUImageView mGPUImageView;
 
     final FakeFilterCalculator fkcalculator = new FakeFilterCalculator();
 
 
     View parameterViewLayout;
-    SeekBar redSB1, redSB2, greenSB1, greenSB2, blueSB1, blueSB2, compositeSB1, compositeSB2, contrastSB;
-    int red1, red2, green1, green2, blue1, blue2, composite1, composite2, contrast;
+
+    SeekBar genderSB, pitchSB, maxFreqSB, angerSB, sadnessSB, happinessSB, intensitySB;
+    int gender,pitch,maxFreq,anger,sadness,happiness,intensity;
+
 
     AlertDialog.Builder popDialog;
 
@@ -249,27 +263,23 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         final LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
         parameterViewLayout = inflater.inflate(R.layout.parameter_popup, (ViewGroup) findViewById(R.id.layout_dialog));
 
-        redSB1 = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarRed1);
-        redSB2 = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarRed2);
-        greenSB1 = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarGreen1);
-        greenSB2 = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarGreen2);
-        blueSB1 = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarBlue1);
-        blueSB2 = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarBlue2);
-        compositeSB1 = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarComposite1);
-        compositeSB2 = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarComposite2);
-        contrastSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarContrast);
+        genderSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarGender);
+        pitchSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarPitch);
+        maxFreqSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarMaxFreq);
+        angerSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarAnger);
+        sadnessSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarSadness);
+        happinessSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarHappiness);
+        intensitySB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarIntensity);
     }
 
-    private void getProgresses() {
-        red1 = redSB1.getProgress();
-        red2 = redSB2.getProgress();
-        green1 = greenSB1.getProgress();
-        green2 = greenSB2.getProgress();
-        blue1 = blueSB1.getProgress();
-        blue2 = blueSB2.getProgress();
-        composite1 = compositeSB1.getProgress();
-        composite2 = compositeSB2.getProgress();
-        contrast = contrastSB.getProgress();
+    private void getProgresses(){
+        gender = genderSB.getProgress();
+        pitch = pitchSB.getProgress();
+        maxFreq = maxFreqSB.getProgress();
+        anger = angerSB.getProgress();
+        sadness = sadnessSB.getProgress();
+        happiness = happinessSB.getProgress();
+        intensity = intensitySB.getProgress();
     }
 
     private void showEditParamsDialog() {
@@ -278,15 +288,13 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         popDialog = new AlertDialog.Builder(this);
         popDialog.setView(parameterViewLayout);
 
-        redSB1.setProgress(red1);
-        redSB2.setProgress(red2);
-        greenSB1.setProgress(green1);
-        greenSB2.setProgress(green2);
-        blueSB1.setProgress(blue1);
-        blueSB2.setProgress(blue2);
-        compositeSB1.setProgress(composite1);
-        compositeSB2.setProgress(composite2);
-        contrastSB.setProgress(contrast);
+        genderSB.setProgress(gender);
+        pitchSB.setProgress(pitch);
+        maxFreqSB.setProgress(maxFreq);
+        angerSB.setProgress(anger);
+        sadnessSB.setProgress(sadness);
+        happinessSB.setProgress(happiness);
+        intensitySB.setProgress(intensity);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             popDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -295,7 +303,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
                     getProgresses();
 
-                    mFilter = fkcalculator.calculateFilter(red1, red2, green1, green2, blue1, blue2, composite1, composite2, contrast);
+                    mFilter = fkcalculator.calculateFilter((float)gender/100, (float)pitch, (float)maxFreq, (float)anger/100, (float)sadness/100, (float)happiness/100, (float)intensity/400);
+
                     mGPUImage.setFilter(mFilter);
                 }
             });
@@ -385,6 +394,11 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     protected void onResume() {
         super.onResume();
         mCameraController.reSetupCamera();
+
+        mOverlayGenerator.setInitializationParams(mCameraController.getPreviewHeight(), mCameraController.getPreviewWidth(),6,8);
+        mOverlayGenerator.prepareEmojis(3, OverlayGenerator.EmojiType.Angry);
+        Bitmap bitmap = mOverlayGenerator.createOverlay(8);
+        mGPUImageView.setImage(bitmap);
     }
 
     @Override

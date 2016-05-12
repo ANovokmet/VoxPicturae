@@ -36,6 +36,8 @@ public class CameraController implements BaseCameraController {
     private int screenHeight;
     private float screenAspectRatio;
 
+    private float optimalAspectRatio = 4.f/3;
+
     private GLSurfaceView mGlSurfaceView;
 
     public CameraController(Activity activity, GPUImage gpuImage, GLSurfaceView glSurfaceView){
@@ -44,6 +46,8 @@ public class CameraController implements BaseCameraController {
         mCurrentCameraId = 0;
         mGlSurfaceView = glSurfaceView;
         this.activity = activity;
+
+
     }
 
     /**
@@ -52,18 +56,38 @@ public class CameraController implements BaseCameraController {
      * @param width
      * @param height
      */
-    public void setAreaSize(int width, int height){
-        Log.d("Setting optimal size to", width+"x"+height);
+    public void setDesiredPreviewSize(int width, int height){
+        Log.d("Set opti prev size to", width+"x"+height);
         screenWidth = width;
         screenHeight = height;
         screenAspectRatio = (float)height / width;
     }
+
+
+    int pictureWidth, pictureHeight;
+    float pictureAspectRatio;
+
+    public void setDesiredPictureSize(int width, int height){
+        Log.d("Set opti pict size to", width+"x"+height);
+        pictureWidth = width;
+        pictureHeight = height;
+        pictureAspectRatio = (float)height / width;
+    }
+
 
     public int getAreaWidth(){
         return screenWidth;
     }
     public int getAreaHeight(){
         return screenHeight;
+    }
+
+    public int getPreviewWidth(){
+        return optimalPreviewWidth;
+    }
+
+    public int getPreviewHeight(){
+        return optimalPreviewHeight;
     }
 
     @Override
@@ -177,17 +201,33 @@ public class CameraController implements BaseCameraController {
 
     private void setupPreviewSize() {
         List<Camera.Size> sizes = mParameters.getSupportedPreviewSizes();
-        Camera.Size optimalPreviewSize = getOptimalSize(sizes);
+
+        for(Camera.Size size : sizes){
+            Log.d("prew supp",size.width+"x"+size.height+" r:"+((float)size.width/size.height));
+        }
+
+        Camera.Size optimalPreviewSize = getOptimalSize(sizes, screenHeight, true);
+        Log.d("prew opti",optimalPreviewSize.width+"x"+optimalPreviewSize.height+" r:"+((float)optimalPreviewSize.width/optimalPreviewSize.height));
+
+        optimalPreviewWidth = optimalPreviewSize.width;
+        optimalPreviewHeight = optimalPreviewSize.height;
+
         mParameters.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
     }
 
+    int optimalPreviewWidth, optimalPreviewHeight;
+
     private void setupPictureSize() {
         List<Camera.Size> sizes = mParameters.getSupportedPictureSizes();
-        Camera.Size optimalPreviewSize = getOptimalSize(sizes); //TODO: LOSE ZA PRAVU KAMERU
+        for(Camera.Size size : sizes){
+            Log.d("pict supp",size.width+"x"+size.height+" r:"+((float)size.width/size.height));
+        }
+        Camera.Size optimalPreviewSize = getOptimalSize(sizes, pictureHeight, true);
+        Log.d("pict opti",optimalPreviewSize.width+"x"+optimalPreviewSize.height+" r:"+((float)optimalPreviewSize.width/optimalPreviewSize.height));
 
         mParameters.setPictureSize(optimalPreviewSize.width, optimalPreviewSize.height);
 
-        mOverlayBitmap = mOverlayGenerator.reCreateOverlayForSize(optimalPreviewSize.width, optimalPreviewSize.height);
+        mOverlayBitmap = mOverlayGenerator.reCreateOverlayForSize(optimalPreviewSize.height, optimalPreviewSize.width);
     }
 
     private Camera.Size getBiggestSize(List<Camera.Size> sizes){
@@ -203,7 +243,7 @@ public class CameraController implements BaseCameraController {
             if(biggestWidth < size.width){
                 biggestWidth = size.width;
 
-                if(previewRatio == screenAspectRatio){
+                if(previewRatio == optimalAspectRatio){
                     optimalSizeRationed = size;
                 }
                 else{
@@ -221,7 +261,7 @@ public class CameraController implements BaseCameraController {
     }
 
 
-    private Camera.Size getOptimalSize(List<Camera.Size> sizes){
+    private Camera.Size getOptimalSize(List<Camera.Size> sizes, int optimalSize, boolean compareToHeight){
         Camera.Size optimalSizeUnrationed = null;
         Camera.Size optimalSizeRationed = null;
 
@@ -230,12 +270,19 @@ public class CameraController implements BaseCameraController {
         for(Camera.Size size : sizes){
             float previewRatio = (float) size.width / size.height;
 
-            int difference = Math.abs(size.height - screenHeight);
+            int difference;
+            if(compareToHeight){
+                difference = Math.abs(size.height - optimalSize);
+            }
+            else {
+                difference = Math.abs(size.width - optimalSize);
+            }
+
 
             if(difference < currentDifference){
                 currentDifference = difference;
 
-                if(previewRatio == screenAspectRatio){
+                if(previewRatio == optimalAspectRatio){
                     optimalSizeRationed = size;
                 }
                 else{
@@ -275,11 +322,9 @@ public class CameraController implements BaseCameraController {
         int rotation = getDisplayOrientation();
 
         if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT){
-            Log.d("cdo",""+(cameraInfo.orientation + rotation) % 360);
             return (cameraInfo.orientation + rotation) % 360;
         }
         else{
-            Log.d("cdo",""+((cameraInfo.orientation - rotation + 360) % 360));
             return (cameraInfo.orientation - rotation + 360) % 360;
         }
     }
@@ -293,7 +338,6 @@ public class CameraController implements BaseCameraController {
             case Surface.ROTATION_180: rotation = 180; break;
             case Surface.ROTATION_270: rotation = 270; break;
         }
-        Log.d("gdo", "" + rotation);
         return rotation;
     }
 
