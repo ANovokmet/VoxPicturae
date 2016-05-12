@@ -1,6 +1,7 @@
 package hr.image;
 
 import android.graphics.Point;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -9,6 +10,7 @@ import hr.sound.ProcessingResult;
 import jp.co.cyberagent.android.gpuimage.GPUImageContrastFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageFilterGroup;
+import jp.co.cyberagent.android.gpuimage.GPUImageLevelsFilter;
 
 /**
  * Created by Ante on 6.5.2016..
@@ -40,6 +42,20 @@ public class FakeFilterCalculator {
         return new GPUImageFilterGroup(filters);
     }
 
+    public GPUImageFilter calculateFilter(float gender, float pitch, float maxFreq, float anger, float sadness, float happiness, float intensity) {
+        ArrayList<GPUImageFilter> filters = new ArrayList<GPUImageFilter>();
+
+        float[] min = new float[] {0.0f, 0.0f ,0.0f};
+        final float[] mid = new float[] {1.0f,1.0f,1.0f};
+        final float[] max = new float[] {1.0f,1.0f,1.0f};
+        final float[] minOut = new float[] {0.0f, 0.0f ,0.0f};
+        final float[] maxOut = new float[] {1.0f,1.0f,1.0f};
+
+
+        GPUImageLevelsFilter levelsFilter = new GPUImageLevelsFilter();
+
+        return new GPUImageFilterGroup(filters);
+    }
 
 
 

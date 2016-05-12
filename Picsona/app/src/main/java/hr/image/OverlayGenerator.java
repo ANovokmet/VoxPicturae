@@ -30,11 +30,12 @@ public class OverlayGenerator {
     ArrayList<Bitmap> originalEmojis;
 
     final Random random = new Random();
-    ArrayList<Integer> drawableIDsAnger = new ArrayList<Integer>(15);
-    ArrayList<Integer> drawableIDsSadness = new ArrayList<Integer>(15);
-    ArrayList<Integer> drawableIDsHapiness = new ArrayList<Integer>(15);
-    ArrayList<Integer> drawableIDsFemale = new ArrayList<Integer>(15);
-    ArrayList<Integer> drawableIDsMale = new ArrayList<Integer>(15);
+    final int ARRAYLIST_SIZE = 15;
+    ArrayList<Integer> drawableIDsAnger = new ArrayList<Integer>(ARRAYLIST_SIZE);
+    ArrayList<Integer> drawableIDsSadness = new ArrayList<Integer>(ARRAYLIST_SIZE);
+    ArrayList<Integer> drawableIDsHapiness = new ArrayList<Integer>(ARRAYLIST_SIZE);
+    ArrayList<Integer> drawableIDsFemale = new ArrayList<Integer>(ARRAYLIST_SIZE);
+    ArrayList<Integer> drawableIDsMale = new ArrayList<Integer>(ARRAYLIST_SIZE);
 
     void getDrawableIds(){
         Field[] ID_Fields = R.drawable.class.getFields();
