@@ -137,7 +137,7 @@ public class OverlayGenerator {
     }
 
     public Bitmap createOverlay(){
-        return placeBitmapsRandomlyInImage(null, originalEmojis, 4);
+        return placeBitmapsRandomlyInImage(null, originalEmojis, 15);
     }
 
     private Bitmap placeBitmapsRandomlyInImage(Bitmap image, List<Bitmap> bitmaps, int count){

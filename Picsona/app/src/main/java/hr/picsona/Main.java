@@ -199,8 +199,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     processing = new SoundProcessing(device, null, 44100);
                     processing.setListener(Main.this);
                     processing.start();
-                    mGPUImage.deleteImage();
-                    mCameraController.reSetupCamera();
                     recording = true;
                 } else {
                     ((Button) v).setText("Start recording");
@@ -271,7 +269,11 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         int width = display.getWidth();
         int height = display.getHeight();
 
+<<<<<<< HEAD
         mCameraController.setAreaSize(height, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
+=======
+        mCameraController.setAreaSize(width/2, height/2);
+>>>>>>> refs/remotes/origin/master
 
         GPUImageView gpuImageView = (GPUImageView)findViewById(R.id.gpuimageView);
 

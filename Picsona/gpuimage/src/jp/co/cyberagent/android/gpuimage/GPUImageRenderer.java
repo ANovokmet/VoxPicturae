@@ -27,6 +27,7 @@ import android.hardware.Camera.Size;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 
+import hr.picsona.extension.ByteArrayPool;
 import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -38,6 +39,9 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 import static jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil.TEXTURE_NO_ROTATION;
 
@@ -152,6 +156,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         if (mGLRgbBuffer == null) {
             mGLRgbBuffer = IntBuffer.allocate(previewSize.width * previewSize.height);
         }
+        camera.addCallbackBuffer(ByteArrayPool.getInstance().getByteArray(data.length));
 
         if (mRunOnDraw.isEmpty()) {
             runOnDraw(new Runnable() {
@@ -159,8 +164,8 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
                 public void run() {
                     GPUImageNativeLibrary.YUVtoRBGA(data, previewSize.width, previewSize.height,
                             mGLRgbBuffer.array());
+                    ByteArrayPool.getInstance().recycleByteArray(data);
                     mGLTextureId = OpenGlUtils.loadTexture(mGLRgbBuffer, previewSize, mGLTextureId);
-                    camera.addCallbackBuffer(data);
                     if (mImageWidth != previewSize.width) {
                         mImageWidth = previewSize.width;
                         mImageHeight = previewSize.height;
@@ -193,8 +198,8 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
                     camera.setPreviewTexture(mSurfaceTexture);
                     //camera.setPreviewCallback(GPUImageRenderer.this);
                     camera.setPreviewCallbackWithBuffer(GPUImageRenderer.this);
-                    byte[] buffer = new byte[bufferSize];
-                    camera.addCallbackBuffer(buffer);
+                    //byte[] buffer = new byte[bufferSize];
+                    camera.addCallbackBuffer(ByteArrayPool.getInstance().getByteArray(bufferSize));
                     camera.startPreview();
                 } catch (IOException e) {
                     e.printStackTrace();
