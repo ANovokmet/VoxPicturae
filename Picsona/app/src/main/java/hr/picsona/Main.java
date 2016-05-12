@@ -269,20 +269,16 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         int width = display.getWidth();
         int height = display.getHeight();
 
-<<<<<<< HEAD
-        mCameraController.setAreaSize(height, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
-=======
-        mCameraController.setAreaSize(width/2, height/2);
->>>>>>> refs/remotes/origin/master
+        mCameraController.setDesiredPreviewSize(height, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
+        mCameraController.setDesiredPictureSize(height, width);
 
-        GPUImageView gpuImageView = (GPUImageView)findViewById(R.id.gpuimageView);
+        mGPUImageView = (GPUImageView)findViewById(R.id.gpuimageView);
 
-        OverlayGenerator og = new OverlayGenerator(this, mCameraController.getAreaWidth(), mCameraController.getAreaHeight(),4,5);
-        Bitmap bitmap = og.createOverlay();
+        mOverlayGenerator = new OverlayGenerator(this);
 
-        gpuImageView.setImage(bitmap);
 
-        mCameraController.setOverlayGenerator(og);
+
+        mCameraController.setOverlayGenerator(mOverlayGenerator);
 
         /*ArrayList<GPUImageFilter> filters = new ArrayList<GPUImageFilter>();
         filters.add(new GPUImageContrastFilter(1.5f));
@@ -290,6 +286,9 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             //++levels filter
         mGPUImage.setFilter(new GPUImageFilterGroup(filters));*/
     }
+
+    OverlayGenerator mOverlayGenerator;
+    GPUImageView mGPUImageView;
 
     final FakeFilterCalculator fkcalculator = new FakeFilterCalculator();
 
@@ -445,6 +444,11 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     protected void onResume() {
         super.onResume();
         mCameraController.reSetupCamera();
+
+        mOverlayGenerator.setInitializationParams(mCameraController.getPreviewHeight(), mCameraController.getPreviewWidth(),6,8);
+        mOverlayGenerator.prepareEmojis(3, OverlayGenerator.EmojiType.Angry);
+        Bitmap bitmap = mOverlayGenerator.createOverlay(8);
+        mGPUImageView.setImage(bitmap);
     }
 
     @Override

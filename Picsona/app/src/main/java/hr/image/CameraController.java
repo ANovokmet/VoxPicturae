@@ -82,6 +82,14 @@ public class CameraController implements BaseCameraController {
         return screenHeight;
     }
 
+    public int getPreviewWidth(){
+        return optimalPreviewWidth;
+    }
+
+    public int getPreviewHeight(){
+        return optimalPreviewHeight;
+    }
+
     @Override
     public void takePicture() {
         if (mParameters.getFocusMode().equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
@@ -198,23 +206,28 @@ public class CameraController implements BaseCameraController {
             Log.d("prew supp",size.width+"x"+size.height+" r:"+((float)size.width/size.height));
         }
 
-        Camera.Size optimalPreviewSize = getOptimalSize(sizes);
+        Camera.Size optimalPreviewSize = getOptimalSize(sizes, screenHeight, true);
         Log.d("prew opti",optimalPreviewSize.width+"x"+optimalPreviewSize.height+" r:"+((float)optimalPreviewSize.width/optimalPreviewSize.height));
+
+        optimalPreviewWidth = optimalPreviewSize.width;
+        optimalPreviewHeight = optimalPreviewSize.height;
 
         mParameters.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
     }
+
+    int optimalPreviewWidth, optimalPreviewHeight;
 
     private void setupPictureSize() {
         List<Camera.Size> sizes = mParameters.getSupportedPictureSizes();
         for(Camera.Size size : sizes){
             Log.d("pict supp",size.width+"x"+size.height+" r:"+((float)size.width/size.height));
         }
-        Camera.Size optimalPreviewSize = getOptimalSize(sizes); //TODO: LOSE ZA PRAVU KAMERU
+        Camera.Size optimalPreviewSize = getOptimalSize(sizes, pictureHeight, true);
         Log.d("pict opti",optimalPreviewSize.width+"x"+optimalPreviewSize.height+" r:"+((float)optimalPreviewSize.width/optimalPreviewSize.height));
 
         mParameters.setPictureSize(optimalPreviewSize.width, optimalPreviewSize.height);
 
-        mOverlayBitmap = mOverlayGenerator.reCreateOverlayForSize(optimalPreviewSize.width, optimalPreviewSize.height);
+        mOverlayBitmap = mOverlayGenerator.reCreateOverlayForSize(optimalPreviewSize.height, optimalPreviewSize.width);
     }
 
     private Camera.Size getBiggestSize(List<Camera.Size> sizes){
@@ -248,7 +261,7 @@ public class CameraController implements BaseCameraController {
     }
 
 
-    private Camera.Size getOptimalSize(List<Camera.Size> sizes){
+    private Camera.Size getOptimalSize(List<Camera.Size> sizes, int optimalSize, boolean compareToHeight){
         Camera.Size optimalSizeUnrationed = null;
         Camera.Size optimalSizeRationed = null;
 
@@ -257,7 +270,14 @@ public class CameraController implements BaseCameraController {
         for(Camera.Size size : sizes){
             float previewRatio = (float) size.width / size.height;
 
-            int difference = Math.abs(size.height - screenHeight);
+            int difference;
+            if(compareToHeight){
+                difference = Math.abs(size.height - optimalSize);
+            }
+            else {
+                difference = Math.abs(size.width - optimalSize);
+            }
+
 
             if(difference < currentDifference){
                 currentDifference = difference;

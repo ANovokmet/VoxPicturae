@@ -78,20 +78,28 @@ public class OverlayGenerator {
     }
 
 
-    public OverlayGenerator(Context context, int originalWidth, int originalHeight, int countPerWidth, int countPerHeight){
+    public OverlayGenerator(Context context){
+        this.context = context;
+        getDrawableIds();
+    }
+
+    public void setInitializationParams(int originalWidth, int originalHeight, int countPerWidth, int countPerHeight){
         this.originalWidth = originalWidth;
         this.originalHeight = originalHeight;
-        this.context = context;
         countW = countPerWidth;
         countH = countPerHeight;
 
         segmentW = originalWidth / countPerWidth;
         segmentH = originalHeight / countPerHeight;
+    }
 
-        getDrawableIds();
-
-        originalEmojis = loadEmojis(2, EmojiType.Angry);
-
+    /**
+     * Loads bitmaps of emojis according to resource IDs
+     * @param numOfEmojis number of distinct emojis loaded
+     * @param type emotion
+     */
+    public void prepareEmojis(int numOfEmojis, EmojiType type){
+        originalEmojis = loadEmojis(numOfEmojis, type);
     }
 
     private ArrayList<Bitmap> loadEmojis(int count, EmojiType type){
@@ -136,13 +144,19 @@ public class OverlayGenerator {
         return bitmaps;
     }
 
-    public Bitmap createOverlay(){
-        return placeBitmapsRandomlyInImage(null, originalEmojis, 15);
+    public Bitmap createOverlay(int numberOfEmojis){
+        if(originalEmojis == null){
+            originalEmojis = loadEmojis(2, EmojiType.Sad);
+        }
+
+        //return placeBitmapsDiagonally(null, originalEmojis, numberOfEmojis);
+        return placeBitmapsRandomlyInImage(null, originalEmojis, numberOfEmojis);
     }
 
     private Bitmap placeBitmapsRandomlyInImage(Bitmap image, List<Bitmap> bitmaps, int count){
         if(image == null){
             image = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
+            Log.d("created bitmap",originalWidth+"x"+originalHeight);
         }
 
         Canvas canvas = new Canvas(image);
@@ -157,8 +171,32 @@ public class OverlayGenerator {
 
             emojiLocations.put(new Point(randx, randy),emoji);
 
-            emoji = BitmapUtils.ScaleBitmap(emoji, getSmallerSegmentDimension(), getSmallerSegmentDimension());
+            int dimm = getSmallerSegmentDimension(segmentH, segmentW);
 
+            emoji = BitmapUtils.ScaleBitmap(emoji, dimm, dimm);
+
+            canvas.drawBitmap(emoji,randx * segmentW, randy * segmentH, null);
+        }
+        return image;
+    }
+
+    private Bitmap placeBitmapsDiagonally(Bitmap image, List<Bitmap> bitmaps, int count){
+        if(image == null){
+            image = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
+            Log.d("created bitmap",originalWidth+"x"+originalHeight);
+        }
+
+        Canvas canvas = new Canvas(image);
+        canvas.drawBitmap(image, new Matrix(), null);
+
+        for(int i = 0; i< count; i++){
+            int randx = i;
+            int randy = i;
+            int randn = random.nextInt(bitmaps.size());
+            Bitmap emoji = bitmaps.get(randn);
+            emojiLocations.put(new Point(randx, randy),emoji);
+            int dimm = getSmallerSegmentDimension(segmentH, segmentW);
+            emoji = BitmapUtils.ScaleBitmap(emoji, dimm, dimm);
             canvas.drawBitmap(emoji,randx * segmentW, randy * segmentH, null);
         }
         return image;
@@ -167,7 +205,7 @@ public class OverlayGenerator {
     HashMap<Point, Bitmap> emojiLocations = new HashMap<Point, Bitmap>();
 
     public Bitmap reCreateOverlayForSize(int width, int height){
-        Bitmap image = Bitmap.createBitmap(height, width, Bitmap.Config.ARGB_8888);
+        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(image);
         canvas.drawBitmap(image, new Matrix(), null);
 
@@ -176,13 +214,17 @@ public class OverlayGenerator {
 
         for(Point k : emojiLocations.keySet()){
 
-            Bitmap emoji = BitmapUtils.ScaleBitmap(emojiLocations.get(k), segmentH, segmentH);
+            Bitmap emoji = emojiLocations.get(k);
+
+            int dimm = getSmallerSegmentDimension(segmentH, segmentW);
+
+            emoji = BitmapUtils.ScaleBitmap(emoji, dimm, dimm);
             canvas.drawBitmap(emoji, k.x * segmentW, k.y * segmentH, null);
         }
         return image;
     }
 
-    private int getSmallerSegmentDimension(){
+    private int getSmallerSegmentDimension(int segmentH, int segmentW){
         if(segmentH > segmentW){
             return segmentW;
         }
@@ -191,7 +233,7 @@ public class OverlayGenerator {
         }
     }
 
-    private int getBiggerSegmentDimension(){
+    private int getBiggerSegmentDimension(int segmentH, int segmentW){
         if(segmentH < segmentW){
             return segmentW;
         }
