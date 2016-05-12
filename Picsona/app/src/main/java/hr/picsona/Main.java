@@ -3,24 +3,40 @@ package hr.picsona;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+<<<<<<< HEAD
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
+=======
+>>>>>>> refs/remotes/origin/master
 import android.content.Intent;
 import android.database.Cursor;
+<<<<<<< HEAD
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+=======
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.net.Uri;
+import android.opengl.GLSurfaceView;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.provider.MediaStore;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+>>>>>>> refs/remotes/origin/master
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -41,10 +57,7 @@ import jp.co.cyberagent.android.gpuimage.GPUImage;
 import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageView;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
+
 public class Main extends AppCompatActivity implements SoundProcessing.OnProcessingUpdateListener {
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -58,6 +71,10 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
      */
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
 
+    /**
+     * Code for which the Choose File Activity is started and for which
+     * result in onActivityResult is checked
+     */
     final int ACTIVITY_CHOOSE_FILE = 1;
 
     /**
@@ -72,10 +89,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         @Override
         public void run() {
             // Delayed removal of status and navigation bar
-
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
             mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -84,7 +97,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-    private View mControlsView;
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
         public void run() {
@@ -93,7 +105,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             if (actionBar != null) {
                 actionBar.show();
             }
-            mControlsView.setVisibility(View.VISIBLE);
         }
     };
     private boolean mVisible;
@@ -103,26 +114,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             hide();
         }
     };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
-
-    /*@Override
-    public boolean dispatchTouchEvent (MotionEvent ev) {  //dodir ekrana
-        Toast.makeText(Main.this, "proba", Toast.LENGTH_SHORT).show();
-        return super.dispatchTouchEvent(ev);
-    }*/
 
     private Button switchCameraButton;
     private Button takePictureButton;
@@ -130,7 +121,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     private GPUImageFilter mFilter;
     private FilterCalculator mFilterCalculator;
     private CameraController mCameraController;
-    private ProgressBar freqGraph;
+    private ProgressBar soundGraph;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,13 +130,10 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
 
-        initialiseGraph();
-
         mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
-        freqGraph = (ProgressBar) findViewById(R.id.intensityBar);
-        freqGraph.getProgressDrawable().setColorFilter(Color.parseColor("#8400dc"), PorterDuff.Mode.SRC_IN);
+        mContentView = findViewById(R.id.container);
+        soundGraph = (ProgressBar) findViewById(R.id.intensityBar);
+        soundGraph.getProgressDrawable().setColorFilter(Color.parseColor("#8400dc"), PorterDuff.Mode.SRC_IN);
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
@@ -155,49 +143,9 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             }
         });
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-
-        switchCameraButton = (Button) findViewById(R.id.buttonSwitchCamera);
-        takePictureButton = (Button) findViewById(R.id.buttonTakePicture);
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
-        findViewById(R.id.recordSound).setOnClickListener(new View.OnClickListener() {
-
-            SoundProcessing processing;
-            boolean recording = false;
-
-            @Override
-            public void onClick(View v) {
-                if (recording == false) {
-                    AudioInputDevice device = null;
-                    try {
-                        device = new AndroidAudioInput(44100);
-                    } catch (Exception e) {
-                        return;
-                    }
-                    initialiseGraph();
-                    ((Button) v).setText("Stop recording");
-                    switchCameraButton.setVisibility(View.GONE);
-                    takePictureButton.setVisibility(View.GONE);
-                    freqGraph.setVisibility(View.VISIBLE);
-                    processing = new SoundProcessing(device, null, 44100);
-                    processing.setListener(Main.this);
-                    processing.start();
-                    recording = true;
-                } else {
-                    ((Button) v).setText("Start recording");
-                    processing.stop();
-                    freqGraph.setVisibility(View.GONE);
-                    switchCameraButton.setVisibility(View.VISIBLE);
-                    takePictureButton.setVisibility(View.VISIBLE);
-                    recording = false;
-                }
-            }
-        });
+        InitializeSoundControls();
 
         findViewById(R.id.loadImage).setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 Intent chooseFile;
@@ -215,15 +163,53 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         getProgresses();
     }
 
-    private void InitializeCameraControls(){
+    private void InitializeSoundControls() {
+        switchCameraButton = (Button) findViewById(R.id.buttonSwitchCamera);
+        takePictureButton = (Button) findViewById(R.id.buttonTakePicture);
+
+        findViewById(R.id.recordSound).setOnClickListener(new View.OnClickListener() {
+
+            SoundProcessing processing;
+            boolean recording = false;
+
+            @Override
+            public void onClick(View v) {
+                if (recording == false) {
+                    AudioInputDevice device;
+                    try {
+                        device = new AndroidAudioInput(SoundProcessing.SAMPLE_RATE);
+                    } catch (Exception e) {
+                        return;
+                    }
+                    ((Button) v).setText("Stop recording");
+                    switchCameraButton.setVisibility(View.GONE);
+                    takePictureButton.setVisibility(View.GONE);
+                    soundGraph.setVisibility(View.VISIBLE);
+                    processing = new SoundProcessing(device, null, SoundProcessing.SAMPLE_RATE);
+                    processing.setListener(Main.this);
+                    processing.start();
+                    recording = true;
+                } else {
+                    ((Button) v).setText("Start recording");
+                    processing.stop();
+                    soundGraph.setVisibility(View.GONE);
+                    switchCameraButton.setVisibility(View.VISIBLE);
+                    takePictureButton.setVisibility(View.VISIBLE);
+                    recording = false;
+                }
+            }
+        });
+    }
+
+    private void InitializeCameraControls() {
         mFilterCalculator = new FilterCalculator();
 
         mGPUImage = new GPUImage(this);
 
-        GLSurfaceView glSurfaceView = (GLSurfaceView)findViewById(R.id.surfaceView);
+        GLSurfaceView glSurfaceView = (GLSurfaceView) findViewById(R.id.surfaceView);
         mGPUImage.setGLSurfaceView(glSurfaceView);
 
-        Button switchCameraButton = (Button)findViewById(R.id.buttonSwitchCamera);
+        Button switchCameraButton = (Button) findViewById(R.id.buttonSwitchCamera);
         switchCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -231,7 +217,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             }
         });
 
-        Button takePictureButton = (Button)findViewById(R.id.buttonTakePicture);
+        Button takePictureButton = (Button) findViewById(R.id.buttonTakePicture);
         takePictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -239,7 +225,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             }
         });
 
-        Button editParamsButton = (Button)findViewById(R.id.buttonEditParams);
+        Button editParamsButton = (Button) findViewById(R.id.buttonEditParams);
         editParamsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -254,6 +240,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         int width = display.getWidth();
         int height = display.getHeight();
 
+<<<<<<< HEAD
         mCameraController.setDesiredPreviewSize(height, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
         mCameraController.setDesiredPictureSize(height, width);
 
@@ -261,6 +248,14 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
         mOverlayGenerator = new OverlayGenerator(this);
 
+=======
+        mCameraController.setAreaSize(width / 2, height / 2);
+
+        GPUImageView gpuImageView = (GPUImageView) findViewById(R.id.gpuimageView);
+
+        OverlayGenerator og = new OverlayGenerator(this, mCameraController.getAreaWidth(), mCameraController.getAreaHeight(), 4, 5);
+        Bitmap bitmap = og.createOverlay();
+>>>>>>> refs/remotes/origin/master
 
 
         mCameraController.setOverlayGenerator(mOverlayGenerator);
@@ -279,8 +274,13 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
 
     View parameterViewLayout;
+<<<<<<< HEAD
     SeekBar genderSB, pitchSB, maxFreqSB, angerSB, sadnessSB, happinessSB, intensitySB;
     int gender,pitch,maxFreq,anger,sadness,happiness,intensity;
+=======
+    SeekBar redSB1, redSB2, greenSB1, greenSB2, blueSB1, blueSB2, compositeSB1, compositeSB2, contrastSB;
+    int red1, red2, green1, green2, blue1, blue2, composite1, composite2, contrast;
+>>>>>>> refs/remotes/origin/master
 
     AlertDialog.Builder popDialog;
 
@@ -297,6 +297,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         intensitySB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarIntensity);
     }
 
+<<<<<<< HEAD
     private void getProgresses(){
         gender = genderSB.getProgress();
         pitch = pitchSB.getProgress();
@@ -305,6 +306,18 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         sadness = sadnessSB.getProgress();
         happiness = happinessSB.getProgress();
         intensity = intensitySB.getProgress();
+=======
+    private void getProgresses() {
+        red1 = redSB1.getProgress();
+        red2 = redSB2.getProgress();
+        green1 = greenSB1.getProgress();
+        green2 = greenSB2.getProgress();
+        blue1 = blueSB1.getProgress();
+        blue2 = blueSB2.getProgress();
+        composite1 = compositeSB1.getProgress();
+        composite2 = compositeSB2.getProgress();
+        contrast = contrastSB.getProgress();
+>>>>>>> refs/remotes/origin/master
     }
 
     private void showEditParamsDialog() {
@@ -328,7 +341,11 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
                     getProgresses();
 
+<<<<<<< HEAD
                     mFilter = fkcalculator.calculateFilter((float)gender/100, (float)pitch, (float)maxFreq, (float)anger/100, (float)sadness/100, (float)happiness/100, (float)intensity/400);
+=======
+                    mFilter = fkcalculator.calculateFilter(red1, red2, green1, green2, blue1, blue2, composite1, composite2, contrast);
+>>>>>>> refs/remotes/origin/master
                     mGPUImage.setFilter(mFilter);
                 }
             });
@@ -363,7 +380,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         if (actionBar != null) {
             actionBar.hide();
         }
-        mControlsView.setVisibility(View.GONE);
         mVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay
@@ -397,18 +413,14 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                freqGraph.setProgress((int) power);
+                soundGraph.setProgress((int) power);
             }
         });
     }
 
-    private void initialiseGraph() {
-
-    }
-
     @Override
     public void onFinish(final ProcessingResult result) {
-        Log.e("rezultati", "" + result);
+        Log.e("results", "" + result);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -440,19 +452,21 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case ACTIVITY_CHOOSE_FILE:
+                if (data == null) {
+                    Toast.makeText(this, "Image loading error", Toast.LENGTH_SHORT).show();
+                    break;
+                }
                 Uri uri = data.getData();
                 String path = uri.toString();
-                Log.e("put do slike", path);
-                if(path.startsWith("content")){
+                if (path.startsWith("content")) {
                     try {
                         path = getRealPathFromURI(uri);
-                    }catch(Exception e){
+                    } catch (Exception e) {
                         Toast.makeText(this, "Supported format is JPG", Toast.LENGTH_SHORT).show();
                         break;
                     }
                 }
-                Log.e("put do slike2", path);
-                if(!path.endsWith(".jpg") && !path.endsWith(".jpeg")) {
+                if (!path.endsWith(".jpg") && !path.endsWith(".jpeg")) {
                     Toast.makeText(this, "Supported format is JPG", Toast.LENGTH_SHORT).show();
                     break;
                 }
@@ -464,10 +478,10 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         }
     }
 
-    public String getRealPathFromURI(Uri contentUri) throws Exception{
+    public String getRealPathFromURI(Uri contentUri) throws Exception {
 
-        String [] proj={MediaStore.Images.Media.DATA};
-        Cursor cursor = this.getContentResolver().query( contentUri,
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = this.getContentResolver().query(contentUri,
                 proj,
                 null,
                 null,
@@ -478,7 +492,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         return cursor.getString(column_index);
     }
 
-    private void switchCamera(){
+    private void switchCamera() {
         mCameraController.cycleCamera();
     }
 

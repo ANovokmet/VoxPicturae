@@ -9,16 +9,6 @@
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
-    <TextView
-        android:id="@+id/fullscreen_content"
-        android:layout_width="match_parent"
-        android:layout_height="273dp"
-        android:gravity="center"
-        android:keepScreenOn="true"
-        android:text="@string/dummy_content"
-        android:textColor="#33b5e5"
-        android:textSize="50sp"
-        android:textStyle="bold" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
@@ -35,115 +25,88 @@
         android:layout_above="@+id/recordSound"
         android:layout_gravity="right|top" />
 
-    <FrameLayout
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:layout_height="193dp"
+        android:text="Debug data"
+        android:id="@+id/debugView"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:layout_gravity="left|top" />
 
-        <LinearLayout
-            android:id="@+id/fullscreen_content_controls"
-            style="?metaButtonBarStyle"
-            android:layout_width="match_parent"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="154dp"
+        android:layout_gravity="center_horizontal|bottom">
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/black_overlay"
-            android:orientation="horizontal"
-            tools:ignore="UselessParent">
-
-            <Button
-                android:id="@+id/dummy_button"
-                style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/dummy_button" />
-
-        </LinearLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="211dp"
-            android:layout_gravity="center_horizontal|bottom">
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Edit params"
-                android:id="@+id/buttonEditParams"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:backgroundTint="#ffc107"
-                android:textColor="#9c27b0" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Start recording"
-                android:id="@+id/recordSound"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginBottom="66dp"
-                android:layout_toLeftOf="@+id/buttonTakePicture"
-                android:layout_toStartOf="@+id/buttonTakePicture" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Take picture"
-                android:id="@+id/buttonTakePicture"
-                android:layout_alignTop="@+id/buttonSwitchCamera"
-                android:layout_toLeftOf="@+id/buttonSwitchCamera"
-                android:layout_toStartOf="@+id/buttonSwitchCamera"
-                android:visibility="visible" />
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Switch camera"
-                android:id="@+id/buttonSwitchCamera"
-                android:layout_alignTop="@+id/recordSound"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true" />
-
-            <ProgressBar
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/intensityBar"
-                android:progress="0"
-                android:max="5000"
-                android:visibility="gone"
-                android:layout_alignBaseline="@+id/recordSound"
-                android:layout_alignParentRight="true"
-                android:layout_toRightOf="@+id/recordSound" />
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Load image"
-                android:id="@+id/loadImage"
-                android:layout_below="@+id/buttonTakePicture"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
-        </RelativeLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="193dp"
-            android:text="Debug data"
-            android:id="@+id/debugView"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
+            android:text="Edit params"
+            android:id="@+id/buttonEditParams"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentTop="true"
-            android:layout_gravity="left|top" />
+            android:layout_centerHorizontal="true"
+            android:backgroundTint="#ffc107"
+            android:textColor="#9c27b0" />
 
-    </FrameLayout>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start recording"
+            android:id="@+id/recordSound"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="66dp"
+            android:layout_toLeftOf="@+id/buttonTakePicture"
+            android:layout_toStartOf="@+id/buttonTakePicture" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Take picture"
+            android:id="@+id/buttonTakePicture"
+            android:layout_alignTop="@+id/buttonSwitchCamera"
+            android:layout_toLeftOf="@+id/buttonSwitchCamera"
+            android:layout_toStartOf="@+id/buttonSwitchCamera"
+            android:visibility="visible" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Switch camera"
+            android:id="@+id/buttonSwitchCamera"
+            android:layout_alignTop="@+id/recordSound"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/intensityBar"
+            android:progress="0"
+            android:max="5000"
+            android:visibility="gone"
+            android:layout_alignBaseline="@+id/recordSound"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/recordSound" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Load image"
+            android:id="@+id/loadImage"
+            android:layout_below="@+id/buttonTakePicture"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+    </RelativeLayout>
 
 </FrameLayout>
