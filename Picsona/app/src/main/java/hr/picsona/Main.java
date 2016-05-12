@@ -39,6 +39,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 import hr.image.CameraController;
 import hr.image.FakeFilterCalculator;
 import hr.image.FilterCalculator;
@@ -48,7 +50,10 @@ import hr.sound.AudioInputDevice;
 import hr.sound.ProcessingResult;
 import hr.sound.SoundProcessing;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
+import jp.co.cyberagent.android.gpuimage.GPUImageContrastFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageFilterGroup;
+import jp.co.cyberagent.android.gpuimage.GPUImageRGBFilter;
 import jp.co.cyberagent.android.gpuimage.GPUImageView;
 
 /**
@@ -266,7 +271,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         int width = display.getWidth();
         int height = display.getHeight();
 
-        mCameraController.setAreaSize(width * 2, height * 2);
+        mCameraController.setAreaSize(height, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
 
         GPUImageView gpuImageView = (GPUImageView)findViewById(R.id.gpuimageView);
 
@@ -277,6 +282,11 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
         mCameraController.setOverlayGenerator(og);
 
+        /*ArrayList<GPUImageFilter> filters = new ArrayList<GPUImageFilter>();
+        filters.add(new GPUImageContrastFilter(1.5f));
+        filters.add(new GPUImageRGBFilter(237/255.f,221/255.f,158/255.f));
+            //++levels filter
+        mGPUImage.setFilter(new GPUImageFilterGroup(filters));*/
     }
 
     final FakeFilterCalculator fkcalculator = new FakeFilterCalculator();

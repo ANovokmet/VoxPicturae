@@ -36,6 +36,8 @@ public class CameraController implements BaseCameraController {
     private int screenHeight;
     private float screenAspectRatio;
 
+    private float optimalAspectRatio = 4.f/3;
+
     private GLSurfaceView mGlSurfaceView;
 
     public CameraController(Activity activity, GPUImage gpuImage, GLSurfaceView glSurfaceView){
@@ -44,6 +46,8 @@ public class CameraController implements BaseCameraController {
         mCurrentCameraId = 0;
         mGlSurfaceView = glSurfaceView;
         this.activity = activity;
+
+
     }
 
     /**
@@ -52,12 +56,24 @@ public class CameraController implements BaseCameraController {
      * @param width
      * @param height
      */
-    public void setAreaSize(int width, int height){
-        Log.d("Setting optimal size to", width+"x"+height);
+    public void setDesiredPreviewSize(int width, int height){
+        Log.d("Set opti prev size to", width+"x"+height);
         screenWidth = width;
         screenHeight = height;
         screenAspectRatio = (float)height / width;
     }
+
+
+    int pictureWidth, pictureHeight;
+    float pictureAspectRatio;
+
+    public void setDesiredPictureSize(int width, int height){
+        Log.d("Set opti pict size to", width+"x"+height);
+        pictureWidth = width;
+        pictureHeight = height;
+        pictureAspectRatio = (float)height / width;
+    }
+
 
     public int getAreaWidth(){
         return screenWidth;
@@ -119,8 +135,8 @@ public class CameraController implements BaseCameraController {
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             final GLSurfaceView view = mGlSurfaceView;
             view.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-            mGPUImage.saveToPicturesWithOverlay(bitmap, mOverlayBitmap, getImageNeededRotation(), mFlipHorizontal, "PicSona",
-                    "PicSona_" + PictureFileManager.createFileName() + ".jpg",
+            mGPUImage.saveToPicturesWithOverlay(bitmap, mOverlayBitmap, getImageNeededRotation(), mFlipHorizontal, "Picsona",
+                    "Picsona_" + PictureFileManager.createFileName() + ".jpg",
                     new GPUImage.OnPictureSavedListener() {
 
                         @Override
@@ -177,13 +193,24 @@ public class CameraController implements BaseCameraController {
 
     private void setupPreviewSize() {
         List<Camera.Size> sizes = mParameters.getSupportedPreviewSizes();
+
+        for(Camera.Size size : sizes){
+            Log.d("prew supp",size.width+"x"+size.height+" r:"+((float)size.width/size.height));
+        }
+
         Camera.Size optimalPreviewSize = getOptimalSize(sizes);
+        Log.d("prew opti",optimalPreviewSize.width+"x"+optimalPreviewSize.height+" r:"+((float)optimalPreviewSize.width/optimalPreviewSize.height));
+
         mParameters.setPreviewSize(optimalPreviewSize.width, optimalPreviewSize.height);
     }
 
     private void setupPictureSize() {
         List<Camera.Size> sizes = mParameters.getSupportedPictureSizes();
+        for(Camera.Size size : sizes){
+            Log.d("pict supp",size.width+"x"+size.height+" r:"+((float)size.width/size.height));
+        }
         Camera.Size optimalPreviewSize = getOptimalSize(sizes); //TODO: LOSE ZA PRAVU KAMERU
+        Log.d("pict opti",optimalPreviewSize.width+"x"+optimalPreviewSize.height+" r:"+((float)optimalPreviewSize.width/optimalPreviewSize.height));
 
         mParameters.setPictureSize(optimalPreviewSize.width, optimalPreviewSize.height);
 
@@ -203,7 +230,7 @@ public class CameraController implements BaseCameraController {
             if(biggestWidth < size.width){
                 biggestWidth = size.width;
 
-                if(previewRatio == screenAspectRatio){
+                if(previewRatio == optimalAspectRatio){
                     optimalSizeRationed = size;
                 }
                 else{
@@ -235,7 +262,7 @@ public class CameraController implements BaseCameraController {
             if(difference < currentDifference){
                 currentDifference = difference;
 
-                if(previewRatio == screenAspectRatio){
+                if(previewRatio == optimalAspectRatio){
                     optimalSizeRationed = size;
                 }
                 else{
@@ -275,11 +302,9 @@ public class CameraController implements BaseCameraController {
         int rotation = getDisplayOrientation();
 
         if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT){
-            Log.d("cdo",""+(cameraInfo.orientation + rotation) % 360);
             return (cameraInfo.orientation + rotation) % 360;
         }
         else{
-            Log.d("cdo",""+((cameraInfo.orientation - rotation + 360) % 360));
             return (cameraInfo.orientation - rotation + 360) % 360;
         }
     }
@@ -293,7 +318,6 @@ public class CameraController implements BaseCameraController {
             case Surface.ROTATION_180: rotation = 180; break;
             case Surface.ROTATION_270: rotation = 270; break;
         }
-        Log.d("gdo", "" + rotation);
         return rotation;
     }
 

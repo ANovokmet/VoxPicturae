@@ -39,4 +39,8 @@ public class FakeFilterCalculator {
 
         return new GPUImageFilterGroup(filters);
     }
+
+
+
+
 }
