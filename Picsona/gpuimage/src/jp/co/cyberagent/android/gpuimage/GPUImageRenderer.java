@@ -27,11 +27,6 @@ import android.hardware.Camera.Size;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 
-import hr.picsona.extension.ByteArrayPool;
-import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -39,9 +34,12 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import hr.picsona.extension.ByteArrayPool;
+import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
 
 import static jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil.TEXTURE_NO_ROTATION;
 
@@ -132,9 +130,9 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
     /**
      * Sets the background color
      *
-     * @param red red color value
+     * @param red   red color value
      * @param green green color value
-     * @param blue red color value
+     * @param blue  red color value
      */
     public void setBackgroundColor(float red, float green, float blue) {
         mBackgroundRed = red;
@@ -150,9 +148,12 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         }
     }
 
+    Size previewSize2;
+
     @Override
     public void onPreviewFrame(final byte[] data, final Camera camera) {
-        final Size previewSize = camera.getParameters().getPreviewSize();
+        //final Size previewSize = camera.getParameters().getPreviewSize();
+        final Size previewSize = previewSize2;
         if (mGLRgbBuffer == null) {
             mGLRgbBuffer = IntBuffer.allocate(previewSize.width * previewSize.height);
         }
@@ -173,6 +174,8 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
                     }
                 }
             });
+        } else {
+            ByteArrayPool.getInstance().recycleByteArray(data);
         }
     }
 
@@ -184,21 +187,19 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
                 GLES20.glGenTextures(1, textures, 0);
                 mSurfaceTexture = new SurfaceTexture(textures[0]);
                 final Size previewSize = camera.getParameters().getPreviewSize();
+                previewSize2 = camera.getParameters().getPreviewSize();
                 Camera.Parameters params = camera.getParameters();
                 params.setPreviewFormat(ImageFormat.NV21);
                 camera.setParameters(params);
-                final int imageFormat = camera.getParameters().getPreviewFormat();
                 int bufferSize = 0;
-                int yStride   = (int) Math.ceil(previewSize.width / 16.0) * 16;
-                int uvStride  = (int) Math.ceil( (yStride / 2) / 16.0) * 16;
-                int ySize     = yStride * previewSize.height;
-                int uvSize    = uvStride * previewSize.height / 2;
-                bufferSize      = ySize + uvSize * 2;
+                int yStride = (int) Math.ceil(previewSize.width / 16.0) * 16;
+                int uvStride = (int) Math.ceil((yStride / 2) / 16.0) * 16;
+                int ySize = yStride * previewSize.height;
+                int uvSize = uvStride * previewSize.height / 2;
+                bufferSize = ySize + uvSize * 2;
                 try {
                     camera.setPreviewTexture(mSurfaceTexture);
-                    //camera.setPreviewCallback(GPUImageRenderer.this);
                     camera.setPreviewCallbackWithBuffer(GPUImageRenderer.this);
-                    //byte[] buffer = new byte[bufferSize];
                     camera.addCallbackBuffer(ByteArrayPool.getInstance().getByteArray(bufferSize));
                     camera.startPreview();
                 } catch (IOException e) {
@@ -335,7 +336,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
     }
 
     public void setRotationCamera(final Rotation rotation, final boolean flipHorizontal,
-            final boolean flipVertical) {
+                                  final boolean flipVertical) {
         setRotation(rotation, flipVertical, flipHorizontal);
     }
 

@@ -1,8 +1,6 @@
 package hr.picsona.extension;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -21,17 +19,16 @@ public class ByteArrayPool {
 
     private BlockingQueue<byte[]> bytePoolQueue = new LinkedBlockingQueue<>();
 
-    public static ByteArrayPool getInstance(){
-        if(byteArrayPool == null){
+    public static ByteArrayPool getInstance() {
+        if (byteArrayPool == null) {
             byteArrayPool = new ByteArrayPool();
         }
         return byteArrayPool;
     }
 
-    public byte[] getByteArray(int length){
-        if(bytePoolQueue.isEmpty()){
-            byte[] array = new byte[length];
-            return array;
+    public byte[] getByteArray(int length) {
+        if (bytePoolQueue.isEmpty()) {
+            return new byte[length];
         }
         try {
             byte[] array = bytePoolQueue.poll(TIMEOUT_MS, TimeUnit.MILLISECONDS);
@@ -40,16 +37,16 @@ public class ByteArrayPool {
             }
             return array;
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.warning(e.getMessage());
             return new byte[length];
         }
     }
 
-    public void recycleByteArray(byte[] array){
+    public void recycleByteArray(byte[] array) {
         try {
             bytePoolQueue.offer(array, TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.warning(e.getMessage());
         }
     }
 }
