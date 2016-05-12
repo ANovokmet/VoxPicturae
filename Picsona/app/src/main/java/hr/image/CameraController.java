@@ -119,8 +119,8 @@ public class CameraController implements BaseCameraController {
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             final GLSurfaceView view = mGlSurfaceView;
             view.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-            mGPUImage.saveToPicturesWithOverlay(bitmap, mOverlayBitmap, getImageNeededRotation(), mFlipHorizontal, "PicSona",
-                    "PicSona_" + PictureFileManager.createFileName() + ".jpg",
+            mGPUImage.saveToPicturesWithOverlay(bitmap, mOverlayBitmap, getImageNeededRotation(), mFlipHorizontal, "Picsona",
+                    "Picsona_" + PictureFileManager.createFileName() + ".jpg",
                     new GPUImage.OnPictureSavedListener() {
 
                         @Override
