@@ -10,7 +10,21 @@
                 android:bottomLeftRadius="0dp"
                 android:bottomRightRadius="40dp"/>
             <solid
-                android:color="#ac8400dc" />
+                android:color="@color/buttonEnabled" />
+        </shape>
+    </item>
+    <item android:state_enabled="false" >
+        <shape
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:shape="rectangle">
+            <corners
+                android:topLeftRadius="0dp"
+                android:topRightRadius="40dp"
+                android:bottomLeftRadius="0dp"
+                android:bottomRightRadius="40dp"/>
+            <stroke
+                android:width="1dp"
+                android:color="@color/buttonDisabled" />  <!--ac8400dc -->
         </shape>
     </item>
     <item >
@@ -22,8 +36,9 @@
                 android:topRightRadius="40dp"
                 android:bottomLeftRadius="0dp"
                 android:bottomRightRadius="40dp" />
-            <solid
-                android:color="#8400dc" />
+            <stroke
+                android:width="1dp"
+                android:color="@color/buttonEnabled" />
         </shape>
     </item>
 </selector>

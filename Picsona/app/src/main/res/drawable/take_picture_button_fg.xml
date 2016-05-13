@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" >
+        <bitmap android:src="@mipmap/take_picture" />
+    </item>
+    <item android:state_enabled="false" >
+        <bitmap android:src="@mipmap/take_picture_d" />
+    </item>
+    <item>
+        <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+            android:src="@mipmap/take_picture_a" />
+    </item>
+</selector>

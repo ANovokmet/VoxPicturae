@@ -2,6 +2,11 @@
 <resources>
     <color name="colorPrimary">#9915af</color>
     <color name="colorPrimaryDark">#691a99</color>
+    <color name="colorPrimaryLight">#d500f9</color>
+    <color name="buttonEnabled">#8400dc</color>
+    <color name="buttonDisabled">#747474</color>
+    <color name="white">#ffffff</color>
+
     <color name="colorAccent">#68EFAD</color>
 
     <color name="black_overlay">#66000000</color>

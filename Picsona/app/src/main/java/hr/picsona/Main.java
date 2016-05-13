@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 
 import android.content.pm.ActivityInfo;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -121,7 +122,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         mVisible = true;
         mContentView = findViewById(R.id.container);
         soundGraph = (ProgressBar) findViewById(R.id.intensityBar);
-        soundGraph.getProgressDrawable().setColorFilter(Color.parseColor("#8400dc"), PorterDuff.Mode.SRC_IN);
+        soundGraph.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
@@ -133,7 +134,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
         InitializeSoundControls();
 
-        findViewById(R.id.loadImage).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.buttonLoadImage).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent chooseFile;
@@ -169,20 +170,16 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     } catch (Exception e) {
                         return;
                     }
-                    ((ImageButton) v).setImageResource(R.mipmap.record_sound_stop);
-                    switchCameraButton.setVisibility(View.GONE);
-                    takePictureButton.setVisibility(View.GONE);
-                    soundGraph.setVisibility(View.VISIBLE);
+                    ((ImageButton) v).setImageResource(R.drawable.record_sound_button_fg_d);
+                    takePictureButton.setEnabled(false);
                     processing = new SoundProcessing(device, null, SoundProcessing.SAMPLE_RATE);
                     processing.setListener(Main.this);
                     processing.start();
                     recording = true;
                 } else {
-                    ((ImageButton) v).setImageResource(R.mipmap.record_sound);
+                    ((ImageButton) v).setImageResource(R.drawable.record_sound_button_fg);
                     processing.stop();
-                    soundGraph.setVisibility(View.GONE);
-                    switchCameraButton.setVisibility(View.VISIBLE);
-                    takePictureButton.setVisibility(View.VISIBLE);
+                    takePictureButton.setEnabled(true);
                     recording = false;
                 }
             }
@@ -229,7 +226,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         int height43 = (int) Math.round((double) width / 3 * 4);
 
         mCameraController.setDesiredPreviewSize(height43, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
-        mCameraController.setDesiredPictureSize(2560, 1920);
+        mCameraController.setDesiredPictureSize(height43, width);
 
         mGPUImageView = (GPUImageView)findViewById(R.id.gpuimageView);
 
@@ -413,10 +410,10 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         genderSB.setProgress((int)(result.getGenderProbability() * 100));
         pitchSB.setProgress((int)(result.getPitch()));
         maxFreqSB.setProgress((int)(result.getMaxFrequency()));
-        angerSB.setProgress((int)(result.getEmotionData().getAngerProbability() * 100));
-        sadnessSB.setProgress((int)(result.getEmotionData().getSadnessProbability() * 100));
+        angerSB.setProgress((int) (result.getEmotionData().getAngerProbability() * 100));
+        sadnessSB.setProgress((int) (result.getEmotionData().getSadnessProbability() * 100));
         happinessSB.setProgress((int)(result.getEmotionData().getHappinessProbability() * 100));
-        intensitySB.setProgress((int)(result.getEmotionData().getSpeechIntensity() * 100));
+        intensitySB.setProgress((int) (result.getEmotionData().getSpeechIntensity() * 100));
     }
 
     @Override

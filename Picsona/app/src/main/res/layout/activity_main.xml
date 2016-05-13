@@ -54,18 +54,18 @@
                 android:layout_width="100dp"
                 android:layout_height="75dp"
                 android:id="@+id/buttonRecordSound"
-                android:src="@mipmap/record_sound"
+                android:src="@drawable/record_sound_button_fg"
                 android:background="@drawable/record_sound_button"
                 android:paddingRight="5dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:paddingLeft="15dp"/>
+                android:paddingLeft="15dp" />
 
             <ImageButton
                 android:layout_width="100dp"
                 android:layout_height="75dp"
                 android:background="@drawable/take_picture_button"
-                android:src="@mipmap/take_picture"
+                android:src="@drawable/take_picture_button_fg"
                 android:id="@+id/buttonTakePicture"
                 android:layout_alignBottom="@+id/buttonRecordSound"
                 android:layout_toRightOf="@+id/buttonRecordSound"
@@ -77,7 +77,6 @@
         </RelativeLayout>
 
         <ImageButton
-            style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@mipmap/switch_camera"
@@ -93,18 +92,19 @@
 
         <ProgressBar
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/intensityBar"
             android:progress="0"
             android:max="5000"
             android:visibility="visible"
-            android:layout_alignParentRight="true" />
+            android:layout_toRightOf="@+id/buttonSwitchCamera"
+            android:layout_toLeftOf="@+id/buttonLoadImage"/>
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/loadImage"
+            android:id="@+id/buttonLoadImage"
             android:src="@mipmap/load_photo"
             android:layout_gravity="right|top"
             android:layout_alignParentTop="true"
