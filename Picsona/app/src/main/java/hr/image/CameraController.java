@@ -1,20 +1,14 @@
 package hr.image;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 import jp.co.cyberagent.android.gpuimage.GPUImage;
@@ -113,7 +107,7 @@ public class CameraController implements BaseCameraController {
         mCamera.takePicture(null, null, pictureCallback);
     }
 
-    public Bitmap mOverlayBitmap;
+    //public Bitmap mOverlayBitmap;
     private boolean mFlipHorizontal;
 
     private Camera.PictureCallback pictureCallback = new Camera.PictureCallback(){
@@ -143,7 +137,11 @@ public class CameraController implements BaseCameraController {
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             final GLSurfaceView view = mGlSurfaceView;
             view.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-            mGPUImage.saveToPicturesWithOverlay(bitmap, mOverlayBitmap, getImageNeededRotation(), mFlipHorizontal, "Picsona",
+
+
+            SaverTasker saverTasker = new SaverTasker(activity,mGPUImage);
+
+            saverTasker.saveToPicturesWithOverlay(bitmap, mOverlayGenerator, getImageNeededRotation(), mFlipHorizontal, "Picsona",
                     "Picsona_" + PictureFileManager.createFileName() + ".jpg",
                     new GPUImage.OnPictureSavedListener() {
 
@@ -227,7 +225,7 @@ public class CameraController implements BaseCameraController {
 
         mParameters.setPictureSize(optimalPreviewSize.width, optimalPreviewSize.height);
 
-        mOverlayBitmap = mOverlayGenerator.reCreateOverlayForSize(optimalPreviewSize.height, optimalPreviewSize.width);
+        //mOverlayBitmap = mOverlayGenerator.reCreateOverlayForSize(optimalPreviewSize.height, optimalPreviewSize.width);
     }
 
     private Camera.Size getBiggestSize(List<Camera.Size> sizes){

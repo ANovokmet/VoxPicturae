@@ -569,11 +569,12 @@ public class GPUImage {
             Bitmap result = getBitmapWithFilterAppliedAndRotation(mBitmap, mOrientation, flipHorizontally);
 
             //TODO: MERGING FRAME AND EMOJIS
+            Bitmap overlay = flipHorizontally ? flip(mOverlayBitmap) : mOverlayBitmap;
             if(mOverlayBitmap.getWidth() != result.getWidth()){
-                result = OverlayBitmap(result, Bitmap.createScaledBitmap(mOverlayBitmap, result.getWidth(), result.getHeight(), false));
+                result = OverlayBitmap(result, Bitmap.createScaledBitmap(overlay, result.getWidth(), result.getHeight(), false));
             }
             else{
-                result = OverlayBitmap(result, mOverlayBitmap);
+                result = OverlayBitmap(result, overlay);
             }
             saveImage(mFolderName, mFileName, result);
             return null;
@@ -610,15 +611,22 @@ public class GPUImage {
         }
     }
 
+    public static Bitmap flip(Bitmap src) {
+        Matrix matrix = new Matrix();
+        matrix.preScale(-1.0f, 1.0f);
+        return Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), matrix, true);
+    }
     /*
     ista implementacija postoji u bitmaputils
      */
     public static Bitmap OverlayBitmap(Bitmap bmp1, Bitmap bmp2) {
-        Bitmap bmOverlay = Bitmap.createBitmap(bmp1.getWidth(), bmp1.getHeight(), bmp1.getConfig());
-        Canvas canvas = new Canvas(bmOverlay);
-        canvas.drawBitmap(bmp1, new Matrix(), null);
+        //Bitmap bmOverlay = Bitmap.createBitmap(bmp1.getWidth(), bmp1.getHeight(), bmp1.getConfig());
+        bmp1 = bmp1.copy(Bitmap.Config.ARGB_8888,true);
+        //Canvas canvas = new Canvas(bmOverlay);
+        Canvas canvas = new Canvas(bmp1);
+        //canvas.drawBitmap(bmp1, new Matrix(), null);
         canvas.drawBitmap(bmp2, 0, 0, null);
-        return bmOverlay;
+        return bmp1;
     }
 
     public interface OnPictureSavedListener {

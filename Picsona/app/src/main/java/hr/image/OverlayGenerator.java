@@ -8,7 +8,11 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.util.Log;
 
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,7 +81,6 @@ public class OverlayGenerator {
         Female,
         Male
     }
-
 
     public OverlayGenerator(Context context){
         this.context = context;
@@ -151,7 +154,8 @@ public class OverlayGenerator {
             originalEmojis = loadEmojis(2, EmojiType.Sad);
         }
 
-        lastOverlay = placeBitmapsRandomlyInImage(null, originalEmojis, numberOfEmojis);
+        //lastOverlay = placeBitmapsRandomlyInImage(null, originalEmojis, numberOfEmojis);
+        lastOverlay = placeBitmapsSymetrically(null, originalEmojis, numberOfEmojis);
         return lastOverlay;
     }
 
@@ -161,7 +165,8 @@ public class OverlayGenerator {
         if(originalEmojis == null){
             originalEmojis = loadEmojis(2, EmojiType.Sad);
         }
-        lastOverlay = placeBitmapsRandomlyInImage(lastOverlay, originalEmojis, numberOfEmojis);
+        //lastOverlay = placeBitmapsRandomlyInImage(lastOverlay, originalEmojis, numberOfEmojis);
+        lastOverlay = placeBitmapsSymetrically(lastOverlay, originalEmojis, numberOfEmojis);
         return lastOverlay;
     }
 
@@ -215,10 +220,46 @@ public class OverlayGenerator {
             int randy = i;
             int randn = random.nextInt(bitmaps.size());
             Bitmap emoji = bitmaps.get(randn);
-            emojiLocations.put(new Point(randx, randy),emoji);
             int dimm = getSmallerSegmentDimension(segmentH, segmentW);
             emoji = BitmapUtils.ScaleBitmap(emoji, dimm, dimm);
-            canvas.drawBitmap(emoji,randx * segmentW, randy * segmentH, null);
+
+            emojiLocations.put(new Point(randx, randy), emoji);
+            canvas.drawBitmap(emoji, randx * segmentW, randy * segmentH, null);
+
+        }
+        return image;
+    }
+
+    private Bitmap placeBitmapsSymetrically(Bitmap image, List<Bitmap> bitmaps, int count){
+        if(image == null){
+            image = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
+            Log.d("created bitmap",originalWidth+"x"+originalHeight);
+        }
+
+        Canvas canvas = new Canvas(image);
+        canvas.drawBitmap(image, new Matrix(), null);
+
+        for(int i = 0; i< count; i++){
+
+            int randx = random.nextInt(countW);
+            int randy = random.nextInt(countH);
+
+            if(random.nextInt(2) == 1){//postaviti na granice - dalje od sredine slike
+                randx = (random.nextInt(2) == 1 ? countW-2 : 0) + random.nextInt(2);
+            }
+            else{
+                randy = (random.nextInt(2) == 1 ? countH-2 : 0) + random.nextInt(2);
+            }
+
+            int randn = random.nextInt(bitmaps.size());
+            Bitmap emoji = bitmaps.get(randn);
+            int dimm = getSmallerSegmentDimension(segmentH, segmentW);
+            emoji = BitmapUtils.ScaleBitmap(emoji, dimm, dimm);
+
+            emojiLocations.put(new Point(randx, randy),emoji);
+            emojiLocations.put(new Point(countW - randx - 1, randy),emoji);
+            canvas.drawBitmap(emoji, randx * segmentW, randy * segmentH, null);
+            canvas.drawBitmap(emoji,(countW - randx - 1) * segmentW, randy * segmentH, null);
         }
         return image;
     }
@@ -245,6 +286,32 @@ public class OverlayGenerator {
         return image;
     }
 
+    public Bitmap reCreateOverlayForSize(Bitmap image, int width, int height, boolean flipHorizontal){
+
+        image = image.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(image);
+        canvas.drawBitmap(image, new Matrix(), null);
+
+        int segmentW = width / countW;
+        int segmentH = height / countH;
+
+        for(Point k : emojiLocations.keySet()){
+
+            Bitmap emoji = emojiLocations.get(k);
+
+            int dimm = getSmallerSegmentDimension(segmentH, segmentW);
+
+            if(flipHorizontal){
+                emoji = BitmapUtils.flipBitmap(emoji);
+            }
+            emoji = BitmapUtils.ScaleBitmap(emoji, dimm, dimm);
+
+
+            canvas.drawBitmap(emoji, k.x * segmentW, k.y * segmentH, null);
+        }
+        return image;
+    }
+
 
     public Bitmap getLastOverlay(){
         if(lastOverlay == null){
@@ -254,6 +321,7 @@ public class OverlayGenerator {
     }
 
     public Bitmap clearLastOverlay(){
+        emojiLocations.clear();
         lastOverlay = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
         return lastOverlay;
     }
@@ -275,4 +343,32 @@ public class OverlayGenerator {
             return segmentH;
         }
     }
+
+    /*public static Bitmap convertToMutable(final Context context, final Bitmap imgIn) {
+        final int width = imgIn.getWidth(), height = imgIn.getHeight();
+        final Config type = imgIn.getConfig();
+        File outputFile = null;
+        final File outputDir = context.getCacheDir();
+        try {
+            outputFile = File.createTempFile(Long.toString(System.currentTimeMillis()), null, outputDir);
+            outputFile.deleteOnExit();
+            final RandomAccessFile randomAccessFile = new RandomAccessFile(outputFile, "rw");
+            final FileChannel channel = randomAccessFile.getChannel();
+            final MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0, imgIn.getRowBytes() * height);
+            imgIn.copyPixelsToBuffer(map);
+            imgIn.recycle();
+            final Bitmap result = Bitmap.createBitmap(width, height, type);
+            map.position(0);
+            result.copyPixelsFromBuffer(map);
+            channel.close();
+            randomAccessFile.close();
+            outputFile.delete();
+            return result;
+        } catch (final Exception e) {
+        } finally {
+            if (outputFile != null)
+                outputFile.delete();
+        }
+        return null;
+    }*/
 }

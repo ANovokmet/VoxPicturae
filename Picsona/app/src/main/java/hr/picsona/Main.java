@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.opengl.GLSurfaceView;
