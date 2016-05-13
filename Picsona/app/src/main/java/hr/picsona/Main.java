@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.opengl.GLSurfaceView;
@@ -233,10 +234,11 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         mGPUImageView = (GPUImageView)findViewById(R.id.gpuimageView);
 
         mOverlayGenerator = new OverlayGenerator(this);
-
+        fkcalculator = new FakeFilterCalculator(mOverlayGenerator);
 
 
         mCameraController.setOverlayGenerator(mOverlayGenerator);
+
 
         /*ArrayList<GPUImageFilter> filters = new ArrayList<GPUImageFilter>();
         filters.add(new GPUImageContrastFilter(1.5f));
@@ -248,7 +250,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     OverlayGenerator mOverlayGenerator;
     GPUImageView mGPUImageView;
 
-    final FakeFilterCalculator fkcalculator = new FakeFilterCalculator();
+    FakeFilterCalculator fkcalculator;
 
 
     View parameterViewLayout;
@@ -304,6 +306,10 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     getProgresses();
 
                     mFilter = fkcalculator.calculateFilter((float)gender/100, (float)pitch, (float)maxFreq, (float)anger/100, (float)sadness/100, (float)happiness/100, (float)intensity/400);
+
+                    Bitmap bitmap = fkcalculator.calculateOverlay((float) gender / 100, (float) anger / 100, (float) sadness / 100, (float) happiness / 100);
+                    mGPUImageView.setImage(bitmap);
+
 
                     mGPUImage.setFilter(mFilter);
                 }
@@ -386,8 +392,28 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                 ((TextView) findViewById(R.id.debugView)).setText("" + result);
             }
         });
-        mFilter = mFilterCalculator.calculateFilter(result);
+
+        //mFilter = mFilterCalculator.calculateFilter(result);
+        //mGPUImage.setFilter(mFilter);
+
+        setProgresses(result);
+        getProgresses();
+
+        mFilter = fkcalculator.calculateFilter(result);
+        Bitmap bitmap = fkcalculator.calculateOverlay(result);
+        mGPUImageView.setImage(bitmap);
         mGPUImage.setFilter(mFilter);
+
+    }
+
+    private void setProgresses(ProcessingResult result) {
+        genderSB.setProgress((int)(result.getGenderProbability() * 100));
+        pitchSB.setProgress((int)(result.getPitch()));
+        maxFreqSB.setProgress((int)(result.getMaxFrequency()));
+        angerSB.setProgress((int)(result.getEmotionData().getAngerProbability() * 100));
+        sadnessSB.setProgress((int)(result.getEmotionData().getSadnessProbability() * 100));
+        happinessSB.setProgress((int)(result.getEmotionData().getHappinessProbability() * 100));
+        intensitySB.setProgress((int)(result.getEmotionData().getSpeechIntensity() * 100));
     }
 
     @Override
@@ -395,10 +421,9 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         super.onResume();
         mCameraController.reSetupCamera();
 
-        mOverlayGenerator.setInitializationParams(mCameraController.getPreviewHeight(), mCameraController.getPreviewWidth(),6,8);
-        mOverlayGenerator.prepareEmojis(3, OverlayGenerator.EmojiType.Angry);
-        Bitmap bitmap = mOverlayGenerator.createOverlay(8);
-        mGPUImageView.setImage(bitmap);
+        mOverlayGenerator.setInitializationParams(mCameraController.getPreviewHeight(), mCameraController.getPreviewWidth(), 6, 8);//treba biti ovdje zbog nuznosti inicijalizacije kamere
+
+        mGPUImageView.setImage(mOverlayGenerator.getLastOverlay());
     }
 
     @Override

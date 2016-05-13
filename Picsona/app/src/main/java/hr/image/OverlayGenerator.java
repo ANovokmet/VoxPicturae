@@ -146,13 +146,25 @@ public class OverlayGenerator {
     }
 
     public Bitmap createOverlay(int numberOfEmojis){
+        emojiLocations.clear();
         if(originalEmojis == null){
             originalEmojis = loadEmojis(2, EmojiType.Sad);
         }
 
-        //return placeBitmapsDiagonally(null, originalEmojis, numberOfEmojis);
-        return placeBitmapsRandomlyInImage(null, originalEmojis, numberOfEmojis);
+        lastOverlay = placeBitmapsRandomlyInImage(null, originalEmojis, numberOfEmojis);
+        return lastOverlay;
     }
+
+
+    Bitmap lastOverlay;
+    public Bitmap reCreateOverlayWithMoreEmojis(int numberOfEmojis){
+        if(originalEmojis == null){
+            originalEmojis = loadEmojis(2, EmojiType.Sad);
+        }
+        lastOverlay = placeBitmapsRandomlyInImage(lastOverlay, originalEmojis, numberOfEmojis);
+        return lastOverlay;
+    }
+
 
     private Bitmap placeBitmapsRandomlyInImage(Bitmap image, List<Bitmap> bitmaps, int count){
         if(image == null){
@@ -166,6 +178,14 @@ public class OverlayGenerator {
         for(int i = 0; i< count; i++){
             int randx = random.nextInt(countW);
             int randy = random.nextInt(countH);
+
+            if(random.nextInt(2) == 1){//postaviti na granice - dalje od sredine slike
+                randx = random.nextInt(2) == 1 ? countW-1 : 0;
+            }
+            else{
+                randy = random.nextInt(2) == 1 ? countH-1 : 0;
+            }
+
             int randn = random.nextInt(bitmaps.size());
 
             Bitmap emoji = bitmaps.get(randn);
@@ -223,6 +243,19 @@ public class OverlayGenerator {
             canvas.drawBitmap(emoji, k.x * segmentW, k.y * segmentH, null);
         }
         return image;
+    }
+
+
+    public Bitmap getLastOverlay(){
+        if(lastOverlay == null){
+            lastOverlay = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
+        }
+        return lastOverlay;
+    }
+
+    public Bitmap clearLastOverlay(){
+        lastOverlay = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
+        return lastOverlay;
     }
 
     private int getSmallerSegmentDimension(int segmentH, int segmentW){
