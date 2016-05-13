@@ -114,7 +114,6 @@ public class CameraController implements BaseCameraController {
         @Override
         public void onPictureTaken(byte[] data,final Camera camera) {
             /*final File pictureFile = PictureFileManager.getSaveFile();
->>>>>>> preview optimizations
 
             if(pictureFile == null){
                 Log.d("Picture Callback error","Picture file was not created");
@@ -220,10 +219,10 @@ public class CameraController implements BaseCameraController {
         for(Camera.Size size : sizes){
             Log.d("pict supp",size.width+"x"+size.height+" r:"+((float)size.width/size.height));
         }
-        Camera.Size optimalPreviewSize = getOptimalSize(sizes, pictureHeight, true);
-        Log.d("pict opti",optimalPreviewSize.width+"x"+optimalPreviewSize.height+" r:"+((float)optimalPreviewSize.width/optimalPreviewSize.height));
+        Camera.Size optimalPictureSize = getOptimalSize(sizes, pictureHeight, true);
+        Log.d("pict opti",optimalPictureSize.width+"x"+optimalPictureSize.height+" r:"+((float)optimalPictureSize.width/optimalPictureSize.height));
 
-        mParameters.setPictureSize(optimalPreviewSize.width, optimalPreviewSize.height);
+        mParameters.setPictureSize(optimalPictureSize.width, optimalPictureSize.height);
 
         //mOverlayBitmap = mOverlayGenerator.reCreateOverlayForSize(optimalPreviewSize.height, optimalPreviewSize.width);
     }

@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,14 +15,13 @@
     <jp.co.cyberagent.android.gpuimage.GPUImageView
         android:id="@+id/gpuimageView"
         android:layout_width="match_parent"
-        android:layout_height="435dp"
+        android:layout_height="460dp"
         android:layout_gravity="right|top" />
 
     <android.opengl.GLSurfaceView
         android:id="@+id/surfaceView"
         android:layout_width="match_parent"
-        android:layout_height="435dp"
-        android:layout_above="@+id/recordSound"
+        android:layout_height="460dp"
         android:layout_gravity="right|top" />
 
     <TextView
@@ -33,58 +32,64 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:layout_gravity="left|top" />
 
     <RelativeLayout
+        android:id="@+id/buttonContainer"
         android:layout_width="match_parent"
-        android:layout_height="154dp"
+        android:layout_below="@+id/surfaceView"
+        android:layout_height="fill_parent"
         android:layout_gravity="center_horizontal|bottom">
 
-        <Button
-            style="?android:attr/buttonStyleSmall"
+        <RelativeLayout
+            android:id="@+id/mainButtonsContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Edit params"
-            android:id="@+id/buttonEditParams"
-            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:backgroundTint="#ffc107"
-            android:textColor="#9c27b0" />
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_horizontal">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Start recording"
-            android:id="@+id/recordSound"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginBottom="66dp"
-            android:layout_toLeftOf="@+id/buttonTakePicture"
-            android:layout_toStartOf="@+id/buttonTakePicture" />
+            <ImageButton
+                android:layout_width="100dp"
+                android:layout_height="75dp"
+                android:id="@+id/buttonRecordSound"
+                android:src="@mipmap/record_sound"
+                android:background="@drawable/record_sound_button"
+                android:paddingRight="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:paddingLeft="15dp"/>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Take picture"
-            android:id="@+id/buttonTakePicture"
-            android:layout_alignTop="@+id/buttonSwitchCamera"
-            android:layout_toLeftOf="@+id/buttonSwitchCamera"
-            android:layout_toStartOf="@+id/buttonSwitchCamera"
-            android:visibility="visible" />
+            <ImageButton
+                android:layout_width="100dp"
+                android:layout_height="75dp"
+                android:background="@drawable/take_picture_button"
+                android:src="@mipmap/take_picture"
+                android:id="@+id/buttonTakePicture"
+                android:layout_alignBottom="@+id/buttonRecordSound"
+                android:layout_toRightOf="@+id/buttonRecordSound"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:paddingLeft="5dp" />
 
-        <Button
+        </RelativeLayout>
+
+        <ImageButton
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Switch camera"
+            android:src="@mipmap/switch_camera"
+            android:background="@drawable/corner_button_left"
             android:id="@+id/buttonSwitchCamera"
-            android:layout_alignTop="@+id/recordSound"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_gravity="right|top"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:paddingLeft="5dp"
+            android:paddingTop="5dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="10dp" />
 
         <ProgressBar
             style="?android:attr/progressBarStyleHorizontal"
@@ -93,20 +98,35 @@
             android:id="@+id/intensityBar"
             android:progress="0"
             android:max="5000"
-            android:visibility="gone"
-            android:layout_alignBaseline="@+id/recordSound"
+            android:visibility="visible"
+            android:layout_alignParentRight="true" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/loadImage"
+            android:src="@mipmap/load_photo"
+            android:layout_gravity="right|top"
+            android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
-            android:layout_toRightOf="@+id/recordSound" />
+            android:background="@drawable/corner_button_right"
+            android:paddingTop="5dp"
+            android:paddingRight="5dp"
+            android:paddingLeft="10dp"
+            android:paddingBottom="10dp" />
 
         <Button
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Load image"
-            android:id="@+id/loadImage"
-            android:layout_below="@+id/buttonTakePicture"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:text="Edit params"
+            android:id="@+id/buttonEditParams"
+            android:backgroundTint="#ffc107"
+            android:textColor="#9c27b0"
+            android:layout_below="@+id/mainButtonsContainer"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
     </RelativeLayout>
 
-</FrameLayout>
+</RelativeLayout>

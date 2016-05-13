@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -102,8 +103,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         }
     };
 
-    private Button switchCameraButton;
-    private Button takePictureButton;
+    private ImageButton switchCameraButton;
+    private ImageButton takePictureButton;
     private GPUImage mGPUImage;
     private GPUImageFilter mFilter;
     private FilterCalculator mFilterCalculator;
@@ -137,8 +138,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             public void onClick(View v) {
                 Intent chooseFile;
                 Intent chooserWrapper;
-                chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
-                chooseFile.setType("image/*");
+                chooseFile = new Intent(Intent.ACTION_PICK);
+                chooseFile.setType("image/jpeg");
                 chooserWrapper = Intent.createChooser(chooseFile, "Choose a picture");
                 startActivityForResult(chooserWrapper, ACTIVITY_CHOOSE_FILE);
             }
@@ -151,10 +152,10 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     }
 
     private void InitializeSoundControls() {
-        switchCameraButton = (Button) findViewById(R.id.buttonSwitchCamera);
-        takePictureButton = (Button) findViewById(R.id.buttonTakePicture);
+        switchCameraButton = (ImageButton) findViewById(R.id.buttonSwitchCamera);
+        takePictureButton = (ImageButton) findViewById(R.id.buttonTakePicture);
 
-        findViewById(R.id.recordSound).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.buttonRecordSound).setOnClickListener(new View.OnClickListener() {
 
             SoundProcessing processing;
             boolean recording = false;
@@ -168,7 +169,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     } catch (Exception e) {
                         return;
                     }
-                    ((Button) v).setText("Stop recording");
+                    ((ImageButton) v).setImageResource(R.mipmap.record_sound_stop);
                     switchCameraButton.setVisibility(View.GONE);
                     takePictureButton.setVisibility(View.GONE);
                     soundGraph.setVisibility(View.VISIBLE);
@@ -177,7 +178,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     processing.start();
                     recording = true;
                 } else {
-                    ((Button) v).setText("Start recording");
+                    ((ImageButton) v).setImageResource(R.mipmap.record_sound);
                     processing.stop();
                     soundGraph.setVisibility(View.GONE);
                     switchCameraButton.setVisibility(View.VISIBLE);
@@ -196,7 +197,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         GLSurfaceView glSurfaceView = (GLSurfaceView) findViewById(R.id.surfaceView);
         mGPUImage.setGLSurfaceView(glSurfaceView);
 
-        Button switchCameraButton = (Button) findViewById(R.id.buttonSwitchCamera);
         switchCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -204,7 +204,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             }
         });
 
-        Button takePictureButton = (Button) findViewById(R.id.buttonTakePicture);
         takePictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -227,10 +226,15 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         int width = display.getWidth();
         int height = display.getHeight();
 
-        mCameraController.setDesiredPreviewSize(height, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
-        mCameraController.setDesiredPictureSize(height, width);
+        int height43 = (int) Math.round((double) width / 3 * 4);
+
+        mCameraController.setDesiredPreviewSize(height43, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
+        mCameraController.setDesiredPictureSize(2560, 1920);
 
         mGPUImageView = (GPUImageView)findViewById(R.id.gpuimageView);
+
+        glSurfaceView.getLayoutParams().height = height43;
+        mGPUImageView.getLayoutParams().height = height43;
 
         mOverlayGenerator = new OverlayGenerator(this);
         fkcalculator = new FakeFilterCalculator(mOverlayGenerator);
@@ -453,8 +457,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     Toast.makeText(this, "Supported format is JPG", Toast.LENGTH_SHORT).show();
                     break;
                 }
-                //mCameraController.stopCamera();  //napraviti "pause" camera
-                mGPUImage.setImage(uri);
+                //mCameraController.stopCamera();
+                //mGPUImage.setImage(uri);
                 break;
             default:
                 Toast.makeText(this, "Image loading error", Toast.LENGTH_SHORT).show();

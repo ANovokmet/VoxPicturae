@@ -60,7 +60,9 @@ public class EmotionRecognizer {
         //remove minimal periods of silence from list because of probability to record very short silence spikes during speech
         silencePeriodLengths.removeAll(Collections.singletonList(minimalPeriodLength));
         //remove first and last element of silence because analysis should only consider interval during which speech occurs
-        silencePeriodLengths.remove(0);
+        if (silencePeriodLengths.size() > 0) {
+            silencePeriodLengths.remove(0);
+        }
         if (silencePeriodLengths.size() - 1 >= 0) {
             silencePeriodLengths.remove(silencePeriodLengths.size() - 1);
         }
