@@ -11,7 +11,7 @@ import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
  * color value [0,1] to a different range linearly. Eg. 0.5 with the normalization range
  * of [0.8,1] is 0.9.
  */
-public class RGBNormalizationFilter  extends GPUImageFilter {
+public class RGBNormalizationFilter extends GPUImageFilter {
     public static final String RGB_FRAGMENT_SHADER = "" +
             "  varying highp vec2 textureCoordinate;\n" +
             "  \n" +
@@ -106,14 +106,14 @@ public class RGBNormalizationFilter  extends GPUImageFilter {
     }
 
     public void setRedInt(final int min, final int max) {
-        setRed((float)min / 255, (float)max / 255);
+        setRed((float) min / 255, (float) max / 255);
     }
 
     public void setGreenInt(final int min, final int max) {
-        setGreen((float)min / 255, (float)max / 255);
+        setGreen((float) min / 255, (float) max / 255);
     }
 
     public void setBlueInt(final int min, final int max) {
-        setBlue((float)min / 255, (float)max / 255);
+        setBlue((float) min / 255, (float) max / 255);
     }
 }

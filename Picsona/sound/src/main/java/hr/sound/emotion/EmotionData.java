@@ -9,7 +9,7 @@ public class EmotionData {
 
     private Status status;
 
-    public EmotionData(double angerProbability, double sadnessProbability, double happinessProbability, double speechIntensity){
+    public EmotionData(double angerProbability, double sadnessProbability, double happinessProbability, double speechIntensity) {
         this.angerProbability = angerProbability;
         this.sadnessProbability = sadnessProbability;
         this.happinessProbability = happinessProbability;
@@ -17,7 +17,7 @@ public class EmotionData {
         status = Status.STATUS_OK;
     }
 
-    public EmotionData(){
+    public EmotionData() {
         this(0, 0, 0, 0);
         status = Status.STATUS_NOT_ENOUGH_DATA;
     }
@@ -53,7 +53,7 @@ public class EmotionData {
         return status;
     }
 
-    public enum Status{
+    public enum Status {
         STATUS_OK,
         STATUS_NOT_ENOUGH_DATA
     }

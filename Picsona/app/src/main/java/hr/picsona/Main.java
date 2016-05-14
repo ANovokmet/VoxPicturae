@@ -3,21 +3,15 @@ package hr.picsona;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
-import android.opengl.GLSurfaceView;
-
-import android.content.Intent;
-
 import android.net.Uri;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Handler;
-
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,8 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import hr.image.CameraController;
-import hr.image.FakeFilterCalculator;
-import hr.image.FilterCalculator;
+import hr.image.ImageFilterFactory;
 import hr.image.OverlayGenerator;
 import hr.sound.AndroidAudioInput;
 import hr.sound.AudioInputDevice;
@@ -43,28 +36,6 @@ import jp.co.cyberagent.android.gpuimage.GPUImageView;
 
 
 public class Main extends AppCompatActivity implements SoundProcessing.OnProcessingUpdateListener {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
-
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Code for which the Choose File Activity is started and for which
-     * result in onActivityResult is checked
-     */
-    final int ACTIVITY_CHOOSE_FILE = 1;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
     private static final int UI_ANIMATION_DELAY = 300;
     private final Handler mHideHandler = new Handler();
     private View mContentView;
@@ -81,17 +52,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-        }
-    };
-    private boolean mVisible;
+
+    private boolean statusBarVisible;
     private final Runnable mHideRunnable = new Runnable() {
         @Override
         public void run() {
@@ -104,11 +66,20 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     private GPUImage mGPUImage;
     private ImageView takenPictureView;
     private GPUImageFilter mFilter;
-    private FilterCalculator mFilterCalculator;
     private Uri mSaveImagePath;
     private View mainButtonContainer, afterCaptureContainer;
     private CameraController mCameraController;
     private ProgressBar soundGraph;
+
+    OverlayGenerator emojiOverlayGenerator;
+    GPUImageView mGPUImageView;
+    ImageFilterFactory imageFilterFactory;
+    View popupViewLayout;
+    SeekBar genderSB, seekBarEmoji, angerSB, sadnessSB, happinessSB, intensitySB;
+    int gender, maxFreq, anger, sadness, happiness, intensity;
+    AlertDialog.Builder popDialog;
+
+    int numOfDoubleEmojis = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +88,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
 
-        mVisible = true;
+        statusBarVisible = true;
         mContentView = findViewById(R.id.container);
         soundGraph = (ProgressBar) findViewById(R.id.intensityBar);
         soundGraph.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
@@ -176,7 +147,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         mainButtonContainer = findViewById(R.id.buttonContainer);
         afterCaptureContainer = findViewById(R.id.afterCaptureContainer);
 
-        mFilterCalculator = new FilterCalculator();
 
         mGPUImage = new GPUImage(this);
 
@@ -204,7 +174,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             @Override
             public void onClick(View view) {
                 if (mFilter == null) {
-                    showToast("No available filter for modification");
+                    showToast(getString(R.string.noFilterString));
                 } else {
                     showEditParamsDialog();
                 }
@@ -230,17 +200,17 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         mCameraController.setDesiredPreviewSize(height43, width);//height i width moraju biti obrnuti zbog orijentacije ekrana
         mCameraController.setDesiredPictureSize(height43, width);
 
-        mGPUImageView = (GPUImageView)findViewById(R.id.gpuimageView);
+        mGPUImageView = (GPUImageView) findViewById(R.id.gpuimageView);
 
         glSurfaceView.getLayoutParams().height = height43;
         mGPUImageView.getLayoutParams().height = height43;
         takenPictureView.getLayoutParams().height = height43;
 
-        mOverlayGenerator = new OverlayGenerator(this);
-        fkcalculator = new FakeFilterCalculator(mOverlayGenerator);
+        emojiOverlayGenerator = new OverlayGenerator(this);
+        imageFilterFactory = new ImageFilterFactory(emojiOverlayGenerator);
 
 
-        mCameraController.setOverlayGenerator(mOverlayGenerator);
+        mCameraController.setOverlayGenerator(emojiOverlayGenerator);
 
         findViewById(R.id.buttonSharePicture).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -249,7 +219,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                 shareIntent.setAction(Intent.ACTION_SEND);
                 shareIntent.putExtra(Intent.EXTRA_STREAM, mSaveImagePath);
                 shareIntent.setType("image/jpeg");
-                startActivity(Intent.createChooser(shareIntent, "Share Image"));
+                startActivity(Intent.createChooser(shareIntent, getString(R.string.shareString)));
             }
         });
 
@@ -257,27 +227,20 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             @Override
             public void onClick(View view) {
                 int deleted = getContentResolver().delete(mSaveImagePath, null, null);
-                if (deleted!=1) {
-                    showToast("Error while deleting picture");
+                if (deleted != 1) {
+                    showToast(getString(R.string.deleteImageErrorString));
                 }
                 restoreStandardInterface();
             }
         });
-
-
-        /*ArrayList<GPUImageFilter> filters = new ArrayList<GPUImageFilter>();
-        filters.add(new GPUImageContrastFilter(1.5f));
-        filters.add(new GPUImageRGBFilter(237/255.f,221/255.f,158/255.f));
-            //++levels filter
-        mGPUImage.setFilter(new GPUImageFilterGroup(filters));*/
     }
 
-    private void setCapturedPictureInterface(){
+    private void setCapturedPictureInterface() {
         mainButtonContainer.setVisibility(View.GONE);
         afterCaptureContainer.setVisibility(View.VISIBLE);
     }
 
-    private void restoreStandardInterface(){
+    private void restoreStandardInterface() {
         afterCaptureContainer.setVisibility(View.GONE);
         mainButtonContainer.setVisibility(View.VISIBLE);
         takenPictureView.setImageDrawable(null);
@@ -287,56 +250,40 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         mSaveImagePath = null;
     }
 
-    OverlayGenerator mOverlayGenerator;
-    GPUImageView mGPUImageView;
-
-    FakeFilterCalculator fkcalculator;
-
-
-    View parameterViewLayout;
-
-    SeekBar genderSB, seekBarEmoji, angerSB, sadnessSB, happinessSB, intensitySB;
-    int gender,maxFreq,anger,sadness,happiness,intensity;
-
-
-    AlertDialog.Builder popDialog;
 
     private void InitializeParameterSeekbars() {
-        if (parameterViewLayout != null && parameterViewLayout instanceof ViewGroup) {
+        if (popupViewLayout != null && popupViewLayout instanceof ViewGroup) {
             return;
         }
         final LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
-        parameterViewLayout = inflater.inflate(R.layout.parameter_popup, null);
+        popupViewLayout = inflater.inflate(R.layout.parameter_popup, null);
 
-
-        genderSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarGender);
+        genderSB = (SeekBar) popupViewLayout.findViewById(R.id.seekBarGender);
         genderSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         genderSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
 
-        seekBarEmoji = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarEmoji);
+        seekBarEmoji = (SeekBar) popupViewLayout.findViewById(R.id.seekBarEmoji);
         seekBarEmoji.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         seekBarEmoji.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
 
-        angerSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarAnger);
+        angerSB = (SeekBar) popupViewLayout.findViewById(R.id.seekBarAnger);
         angerSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         angerSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
 
-        sadnessSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarSadness);
+        sadnessSB = (SeekBar) popupViewLayout.findViewById(R.id.seekBarSadness);
         sadnessSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         sadnessSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
 
-        happinessSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarHappiness);
+        happinessSB = (SeekBar) popupViewLayout.findViewById(R.id.seekBarHappiness);
         happinessSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         happinessSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
 
-        intensitySB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarIntensity);
+        intensitySB = (SeekBar) popupViewLayout.findViewById(R.id.seekBarIntensity);
         intensitySB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         intensitySB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
-
-
     }
 
-    private void getProgresses(){
+    private void getProgresses() {
         gender = genderSB.getProgress();
         numOfDoubleEmojis = seekBarEmoji.getProgress();
         anger = angerSB.getProgress();
@@ -349,7 +296,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
         InitializeParameterSeekbars();
         popDialog = new AlertDialog.Builder(this);
-        popDialog.setView(parameterViewLayout);
+        popDialog.setView(popupViewLayout);
 
         genderSB.setProgress(gender);
         seekBarEmoji.setProgress(numOfDoubleEmojis);
@@ -363,16 +310,14 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             public void onDismiss(DialogInterface dialogInterface) {
 
                 getProgresses();
-                if (parameterViewLayout instanceof ViewGroup) {
-                    ((ViewGroup) parameterViewLayout.getParent()).removeView(parameterViewLayout);
+                if (popupViewLayout instanceof ViewGroup) {//recycling the view
+                    ((ViewGroup) popupViewLayout.getParent()).removeView(popupViewLayout);
                 }
 
-                mFilter = fkcalculator.calculateFilter((float) gender / 100, (float) 420, (float) maxFreq, (float) anger / 100, (float) sadness / 100, (float) happiness / 100, (float) intensity / 400);
+                mFilter = imageFilterFactory.calculateFilter((float) gender / 100, (float) 420, (float) maxFreq, (float) anger / 100, (float) sadness / 100, (float) happiness / 100, (float) intensity / 400);
 
-                Bitmap bitmap = fkcalculator.calculateOverlay((float) gender / 100, (float) anger / 100, (float) sadness / 100, (float) happiness / 100, numOfDoubleEmojis);
+                Bitmap bitmap = imageFilterFactory.calculateOverlay((float) gender / 100, (float) anger / 100, (float) sadness / 100, (float) happiness / 100, numOfDoubleEmojis);
                 mGPUImageView.setImage(bitmap);
-
-
                 mGPUImage.setFilter(mFilter);
             }
         });
@@ -382,15 +327,11 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
         delayedHide(100);
     }
 
     private void toggle() {
-        if (mVisible) {
+        if (statusBarVisible) {
             hide();
         } else {
             show();
@@ -398,15 +339,9 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     }
 
     private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-        mVisible = false;
+        statusBarVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
         mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
     }
 
@@ -415,11 +350,10 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         // Show the system bar
         mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
+        statusBarVisible = true;
 
         // Schedule a runnable to display UI elements after a delay
         mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
     }
 
     /**
@@ -443,7 +377,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
     @Override
     public void onFinish(final ProcessingResult result) {
-        Log.e("results", "" + result);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -453,32 +386,27 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
         soundGraph.setProgress(0);
 
-        //mFilter = mFilterCalculator.calculateFilter(result);
-        //mGPUImage.setFilter(mFilter);
-
         setProgresses(result);
         getProgresses();
 
-        mFilter = fkcalculator.calculateFilter(result);
-        Bitmap bitmap = fkcalculator.calculateOverlay(result, numOfDoubleEmojis);
+        mFilter = imageFilterFactory.calculateFilter(result);
+        Bitmap bitmap = imageFilterFactory.calculateOverlay(result, numOfDoubleEmojis);
         mGPUImageView.setImage(bitmap);
         mGPUImage.setFilter(mFilter);
-
     }
 
-    int numOfDoubleEmojis = 3;
 
     private void setProgresses(ProcessingResult result) {
         genderSB.setProgress((int) (result.getGenderProbability() * 100));
         seekBarEmoji.setProgress(numOfDoubleEmojis);
-        maxFreq = (int)result.getMaxFrequency();
+        maxFreq = (int) result.getMaxFrequency();
         angerSB.setProgress((int) (result.getEmotionData().getAngerProbability() * 100));
         sadnessSB.setProgress((int) (result.getEmotionData().getSadnessProbability() * 100));
         happinessSB.setProgress((int) (result.getEmotionData().getHappinessProbability() * 100));
         intensitySB.setProgress((int) (result.getEmotionData().getSpeechIntensity() * 100));
     }
 
-    private void showToast(String message){
+    private void showToast(String message) {
         Toast toast = Toast.makeText(Main.this, message, Toast.LENGTH_SHORT);
         toast.getView().setBackgroundColor(getResources().getColor(R.color.buttonEnabled));
         ((TextView) toast.getView().findViewById(android.R.id.message)).setTextColor(getResources().getColor(R.color.white));
@@ -490,9 +418,9 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         super.onResume();
         mCameraController.reSetupCamera();
 
-        mOverlayGenerator.setInitializationParams(mCameraController.getPreviewHeight(), mCameraController.getPreviewWidth(), 6, 8);//treba biti ovdje zbog nuznosti inicijalizacije kamere
+        emojiOverlayGenerator.setInitializationParams(mCameraController.getPreviewHeight(), mCameraController.getPreviewWidth(), 6, 8);//treba biti ovdje zbog nuznosti inicijalizacije kamere
 
-        mGPUImageView.setImage(mOverlayGenerator.getLastOverlay());
+        mGPUImageView.setImage(emojiOverlayGenerator.getLastOverlay());
     }
 
     @Override

@@ -11,7 +11,6 @@ import java.util.logging.Logger;
  */
 public class ByteArrayPool {
 
-
     private final static Logger LOGGER = Logger.getLogger(ByteArrayPool.class.getName());
     private final static int TIMEOUT_MS = 2;
 

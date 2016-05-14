@@ -3,4 +3,11 @@
 
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="noFilterString">No available filter for modification</string>
+    <string name="shareString">Share Image</string>
+    <string name="deleteImageErrorString">Error while deleting picture</string>
+    <string name="saveImageErrorString">Error while saving image</string>
+    <string name="saveImageFolder">Picsona</string>
+    <string name="fileNamePrefix">Picsona_</string>
+    <string name="saveImageSuccess">"Picture saved at "</string>
 </resources>

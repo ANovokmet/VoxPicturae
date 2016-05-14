@@ -59,7 +59,6 @@ public class PostProcessingThread implements Runnable {
 
         EmotionData emotionData = EmotionRecognizer.emotionFromSpeech(snaga);
 
-        LOGGER.info("average pitch " + pitchSum / numberOfElements + " " + freqSum / numberOfElements + " " + genderProbability / weightOfElements);
         if (listener != null) {
             listener.onFinish(new ProcessingResult(genderProbability / weightOfElements, pitchSum / numberOfElements, freqSum / numberOfElements, emotionData));
         }

@@ -13,19 +13,19 @@ public class TrackElement {
     private double gender;  // probability of 1 means male
 
 
-    public TrackElement(short[] data, int length){
+    public TrackElement(short[] data, int length) {
         this.data = new short[length];
         timestamp = new Date();
         copyArray(data, this.data, length);
     }
 
-    private void copyArray(short[] src, short[] dest, int how_much){
-        for(int i=0; i<how_much; i++){
+    private void copyArray(short[] src, short[] dest, int how_much) {
+        for (int i = 0; i < how_much; i++) {
             dest[i] = src[i];
         }
     }
 
-    public short[] getData(){
+    public short[] getData() {
         return this.data;
     }
 

@@ -2,14 +2,11 @@ package hr.image;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
-import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,11 +17,12 @@ import jp.co.cyberagent.android.gpuimage.GPUImage;
 /**
  * Created by Ante on 13.5.2016..
  */
-public class SaverTasker {
+public class PictureSaveExecutor {
 
     GPUImage mGPUImage;
     Context mContext;
-    public SaverTasker(Context context, GPUImage gpuImage){
+
+    public PictureSaveExecutor(Context context, GPUImage gpuImage) {
         mGPUImage = gpuImage;
         mContext = context;
     }
@@ -46,8 +44,6 @@ public class SaverTasker {
         private final int mOrientation;
         private final boolean flipHorizontally;
 
-
-
         public SaveWithOverlayTask(final Bitmap bitmap, final OverlayGenerator overlayGenerator, final int orientation, final boolean flipHorizontally, final String folderName, final String fileName,
                                    final GPUImage.OnPictureSavedListener listener) {
             mOverlayGenerator = overlayGenerator;
@@ -65,8 +61,7 @@ public class SaverTasker {
         protected Void doInBackground(final Void... params) {
             Bitmap result = mGPUImage.getBitmapWithFilterAppliedAndRotation(mBitmap, mOrientation, flipHorizontally);
 
-            //TODO FLIP WHEN flipHoriz == true;
-            result = mOverlayGenerator.reCreateOverlayForSize(result,result.getWidth(),result.getHeight(), flipHorizontally);
+            result = mOverlayGenerator.reCreateOverlayForSize(result, result.getWidth(), result.getHeight(), flipHorizontally);
 
             saveImage(mFolderName, mFileName, result);
             return null;
@@ -101,8 +96,5 @@ public class SaverTasker {
             }
         }
     }
-
-
-
 
 }

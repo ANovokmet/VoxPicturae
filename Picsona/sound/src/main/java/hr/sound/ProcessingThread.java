@@ -69,7 +69,6 @@ public class ProcessingThread implements Runnable {
             }
             fft.realForward(processingBuffer);
 
-
             //determining the maximal frequency
 
             double maximalSumOfIntensities = 0;

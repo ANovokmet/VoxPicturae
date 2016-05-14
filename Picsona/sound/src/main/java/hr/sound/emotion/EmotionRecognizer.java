@@ -16,8 +16,6 @@ public class EmotionRecognizer {
         double harmonicMean = harmonicMean(elementPowers);
         double standardDeviation = standardDeviation(elementPowers, harmonicMean);
 
-        LOGGER.info("emotion " + harmonicMean + "  " + standardDeviation);
-
         List<Integer> silencePeriodLengths = new ArrayList<>();
         List<Integer> speechPeriodLengths = new ArrayList<>();
         int speechPeriodLength = 0, silencePeriodLength = 0;
@@ -50,8 +48,6 @@ public class EmotionRecognizer {
             return new EmotionData();
         }
 
-        LOGGER.info("prvih nekoliko elemanata " + firstSpeechPeriod);
-
         int minimalPeriodLength = listMinimum(speechPeriodLengths);
         //remove minimal periods of speech from list because of probability to record very short speech spikes in silence
         speechPeriodLengths.removeAll(Collections.singletonList(minimalPeriodLength));
@@ -81,7 +77,6 @@ public class EmotionRecognizer {
         if (Double.isNaN(silencePeriodLengthsAvg)) {
             silencePeriodLengthsAvg = 0;
         }
-        LOGGER.info("govor tisina " + speechPeriodLengths + " " + silencePeriodLengths + " " + speechPeriodLengthsAvg + " " + silencePeriodLengthsAvg);
 
         double periodLengthsDiff = 0.15 * (speechPeriodLengthsAvg + silencePeriodLengthsAvg);
         double neutralSadnessDampening = 1;
@@ -118,7 +113,6 @@ public class EmotionRecognizer {
             happinessProbability += (1 - tenseEmotionsLocalProbability) * 0.6666 * happinessAdjustment;
         }
 
-        LOGGER.info("calculated a h s " + angerProbability + " " + happinessProbability + " " + sadnessProbability);
         return new EmotionData(adjustProbability(angerProbability), adjustProbability(sadnessProbability), adjustProbability(happinessProbability), averageMean(elementPowers) / 2000);
     }
 

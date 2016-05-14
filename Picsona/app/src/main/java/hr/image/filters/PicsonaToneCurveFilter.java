@@ -21,34 +21,41 @@ public class PicsonaToneCurveFilter extends GPUImageToneCurveFilter {
     /**
      * Input red points to make a curve from. Every point has 2 values, x being the input and
      * y the output value. Both values in the range of [0,255].
+     *
      * @param points array of points
      */
     public void setRedCurveFromArray(Point[] points) {
         PointF[] outPoints = convertRGBPointArrayToPointFArray(points);
         setRedControlPoints(outPoints);
     }
+
     /**
      * Input green points to make a curve from. Every point has 2 values, x being the input and
      * y the output value. Both values in the range of [0,255].
+     *
      * @param points array of points
      */
     public void setGreenCurveFromArray(Point[] points) {
         PointF[] outPoints = convertRGBPointArrayToPointFArray(points);
         setGreenControlPoints(outPoints);
     }
+
     /**
      * Input blue points to make a curve from. Every point has 2 values, x being the input and
      * y the output value. Both values in the range of [0,255].
+     *
      * @param points array of points
      */
     public void setBlueCurveFromArray(Point[] points) {
         PointF[] outPoints = convertRGBPointArrayToPointFArray(points);
         setBlueControlPoints(outPoints);
     }
+
     /**
      * Input composite points to make a curve from. Every point has 2 values, x being the input and
      * y the output value. Both values in the range of [0,255]. Assigning this value will have an
      * effect on overall brightness of image.
+     *
      * @param points array of points
      */
     public void setCompositeCurveFromArray(Point[] points) {
@@ -61,6 +68,7 @@ public class PicsonaToneCurveFilter extends GPUImageToneCurveFilter {
      * missing at the end or beginning (no point with x=0 or x=255)
      * it adds spline points with the same output value as the last
      * one or first one, not 0 or 255.
+     *
      * @param points
      * @return
      */
@@ -130,10 +138,11 @@ public class PicsonaToneCurveFilter extends GPUImageToneCurveFilter {
 
     /**
      * Converts array of points with int values [0,255] to an array of points with floats [0,1]
+     *
      * @param points
      * @return result array
      */
-    private PointF[] convertRGBPointArrayToPointFArray(Point[] points){
+    private PointF[] convertRGBPointArrayToPointFArray(Point[] points) {
         float pointRate = 1.0f / 255;
 
         int pointCount = points.length;

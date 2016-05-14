@@ -8,13 +8,8 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.util.Log;
 
-import java.io.File;
-import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,30 +36,38 @@ public class OverlayGenerator {
     ArrayList<Integer> drawableIDsFemale = new ArrayList<Integer>(ARRAYLIST_SIZE);
     ArrayList<Integer> drawableIDsMale = new ArrayList<Integer>(ARRAYLIST_SIZE);
 
-    void getDrawableIds(){
+    public enum EmojiType {
+        Angry,
+        Happy,
+        Sad,
+        Female,
+        Male
+    }
+
+    void getDrawableIds() {
         Field[] ID_Fields = R.drawable.class.getFields();
-        for(int i = 0; i < ID_Fields.length; i++) {
+        for (int i = 0; i < ID_Fields.length; i++) {
             try {
                 int resArrayId = ID_Fields[i].getInt(null);
                 String name = context.getResources().getResourceEntryName(resArrayId);
-                if(name.length()<=4)
-                switch (name.charAt(0)){
-                    case 'a':
-                        drawableIDsAnger.add(resArrayId);
-                        break;
-                    case 's':
-                        drawableIDsSadness.add(resArrayId);
-                        break;
-                    case 'h':
-                        drawableIDsHapiness.add(resArrayId);
-                        break;
-                    case 'f':
-                        drawableIDsFemale.add(resArrayId);
-                        break;
-                    case 'm':
-                        drawableIDsMale.add(resArrayId);
-                        break;
-                }
+                if (name.length() <= 4)
+                    switch (name.charAt(0)) {
+                        case 'a':
+                            drawableIDsAnger.add(resArrayId);
+                            break;
+                        case 's':
+                            drawableIDsSadness.add(resArrayId);
+                            break;
+                        case 'h':
+                            drawableIDsHapiness.add(resArrayId);
+                            break;
+                        case 'f':
+                            drawableIDsFemale.add(resArrayId);
+                            break;
+                        case 'm':
+                            drawableIDsMale.add(resArrayId);
+                            break;
+                    }
 
 
             } catch (Exception e) {
@@ -74,20 +77,12 @@ public class OverlayGenerator {
         }
     }
 
-    public enum EmojiType{
-        Angry,
-        Happy,
-        Sad,
-        Female,
-        Male
-    }
-
-    public OverlayGenerator(Context context){
+    public OverlayGenerator(Context context) {
         this.context = context;
         getDrawableIds();
     }
 
-    public void setInitializationParams(int originalWidth, int originalHeight, int countPerWidth, int countPerHeight){
+    public void setInitializationParams(int originalWidth, int originalHeight, int countPerWidth, int countPerHeight) {
         this.originalWidth = originalWidth;
         this.originalHeight = originalHeight;
         countW = countPerWidth;
@@ -99,17 +94,18 @@ public class OverlayGenerator {
 
     /**
      * Loads bitmaps of emojis according to resource IDs
+     *
      * @param numOfEmojis number of distinct emojis loaded
-     * @param type emotion
+     * @param type        emotion
      */
-    public void prepareEmojis(int numOfEmojis, EmojiType type){
+    public void prepareEmojis(int numOfEmojis, EmojiType type) {
         originalEmojis = loadEmojis(numOfEmojis, type);
     }
 
-    private ArrayList<Bitmap> loadEmojis(int count, EmojiType type){
+    private ArrayList<Bitmap> loadEmojis(int count, EmojiType type) {
 
         List<Integer> drawableIDs;
-        switch (type){
+        switch (type) {
             case Angry:
                 drawableIDs = drawableIDsAnger;
                 break;
@@ -133,12 +129,12 @@ public class OverlayGenerator {
         ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
 
         List<Integer> ints = new ArrayList<>(drawableIDs.size());
-        for(int i = 0; i < drawableIDs.size(); i++){
+        for (int i = 0; i < drawableIDs.size(); i++) {
             ints.add(i);
         }
         Collections.shuffle(ints);
 
-        for(int i = 0; i < count; i++){
+        for (int i = 0; i < count; i++) {
 
             int rand = ints.get(i);
             int resourceId = drawableIDs.get(rand);
@@ -148,74 +144,67 @@ public class OverlayGenerator {
         return bitmaps;
     }
 
-    public Bitmap createOverlay(int numberOfEmojis){
+    public Bitmap createOverlay(int numberOfEmojis) {
         emojiLocations.clear();
-        if(originalEmojis == null){
+        if (originalEmojis == null) {
             originalEmojis = loadEmojis(2, EmojiType.Sad);
         }
 
-        //lastOverlay = placeBitmapsRandomlyInImage(null, originalEmojis, numberOfEmojis);
         lastOverlay = placeBitmapsSymetrically(null, originalEmojis, numberOfEmojis);
         return lastOverlay;
     }
 
 
     Bitmap lastOverlay;
-    public Bitmap reCreateOverlayWithMoreEmojis(int numberOfEmojis){
-        if(originalEmojis == null){
+
+    public Bitmap reCreateOverlayWithMoreEmojis(int numberOfEmojis) {
+        if (originalEmojis == null) {
             originalEmojis = loadEmojis(2, EmojiType.Sad);
         }
-        //lastOverlay = placeBitmapsRandomlyInImage(lastOverlay, originalEmojis, numberOfEmojis);
+
         lastOverlay = placeBitmapsSymetrically(lastOverlay, originalEmojis, numberOfEmojis);
         return lastOverlay;
     }
 
 
-    private Bitmap placeBitmapsRandomlyInImage(Bitmap image, List<Bitmap> bitmaps, int count){
-        if(image == null){
+    private Bitmap placeBitmapsRandomlyInImage(Bitmap image, List<Bitmap> bitmaps, int count) {
+        if (image == null) {
             image = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
-            Log.d("created bitmap",originalWidth+"x"+originalHeight);
+            Log.d("created bitmap", originalWidth + "x" + originalHeight);
         }
 
         Canvas canvas = new Canvas(image);
         canvas.drawBitmap(image, new Matrix(), null);
 
-        for(int i = 0; i< count; i++){
+        for (int i = 0; i < count; i++) {
             int randx = random.nextInt(countW);
             int randy = random.nextInt(countH);
 
-            if(random.nextInt(2) == 1){//postaviti na granice - dalje od sredine slike
-                randx = random.nextInt(2) == 1 ? countW-1 : 0;
-            }
-            else{
-                randy = random.nextInt(2) == 1 ? countH-1 : 0;
+            if (random.nextInt(2) == 1) {//postaviti na granice - dalje od sredine slike
+                randx = random.nextInt(2) == 1 ? countW - 1 : 0;
+            } else {
+                randy = random.nextInt(2) == 1 ? countH - 1 : 0;
             }
 
             int randn = random.nextInt(bitmaps.size());
-
             Bitmap emoji = bitmaps.get(randn);
-
-            emojiLocations.put(new Point(randx, randy),emoji);
-
+            emojiLocations.put(new Point(randx, randy), emoji);
             int dimm = getSmallerSegmentDimension(segmentH, segmentW);
-
             emoji = BitmapUtils.ScaleBitmap(emoji, dimm, dimm);
-
-            canvas.drawBitmap(emoji,randx * segmentW, randy * segmentH, null);
+            canvas.drawBitmap(emoji, randx * segmentW, randy * segmentH, null);
         }
         return image;
     }
 
-    private Bitmap placeBitmapsDiagonally(Bitmap image, List<Bitmap> bitmaps, int count){
-        if(image == null){
+    private Bitmap placeBitmapsDiagonally(Bitmap image, List<Bitmap> bitmaps, int count) {
+        if (image == null) {
             image = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
-            Log.d("created bitmap",originalWidth+"x"+originalHeight);
         }
 
         Canvas canvas = new Canvas(image);
         canvas.drawBitmap(image, new Matrix(), null);
 
-        for(int i = 0; i< count; i++){
+        for (int i = 0; i < count; i++) {
             int randx = i;
             int randy = i;
             int randn = random.nextInt(bitmaps.size());
@@ -230,16 +219,15 @@ public class OverlayGenerator {
         return image;
     }
 
-    private Bitmap placeBitmapsSymetrically(Bitmap image, List<Bitmap> bitmaps, int count){
-        if(image == null){
+    private Bitmap placeBitmapsSymetrically(Bitmap image, List<Bitmap> bitmaps, int count) {
+        if (image == null) {
             image = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
-            Log.d("created bitmap",originalWidth+"x"+originalHeight);
         }
 
         Canvas canvas = new Canvas(image);
         canvas.drawBitmap(image, new Matrix(), null);
 
-        for(int i = 0; i< count; i++){
+        for (int i = 0; i < count; i++) {
 
             Point first = new Point();
             Point second = new Point();
@@ -255,17 +243,16 @@ public class OverlayGenerator {
                 second.x = countW - first.x - 1;
                 second.y = first.y;
                 j--;
-            }while ((emojiLocations.containsKey(first) || emojiLocations.containsKey(second)) && j > 0);
-
-
+            }
+            while ((emojiLocations.containsKey(first) || emojiLocations.containsKey(second)) && j > 0);
 
             int randn = random.nextInt(bitmaps.size());
             Bitmap emoji = bitmaps.get(randn);
             int dimm = getSmallerSegmentDimension(segmentH, segmentW);
             emoji = BitmapUtils.ScaleBitmap(emoji, dimm, dimm);
 
-            emojiLocations.put(first,emoji);
-            emojiLocations.put(second,emoji);
+            emojiLocations.put(first, emoji);
+            emojiLocations.put(second, emoji);
 
 
             canvas.drawBitmap(emoji, first.x * segmentW, first.y * segmentH, null);
@@ -276,7 +263,7 @@ public class OverlayGenerator {
 
     HashMap<Point, Bitmap> emojiLocations = new HashMap<Point, Bitmap>();
 
-    public Bitmap reCreateOverlayForSize(int width, int height){
+    public Bitmap reCreateOverlayForSize(int width, int height) {
         Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(image);
         canvas.drawBitmap(image, new Matrix(), null);
@@ -284,7 +271,7 @@ public class OverlayGenerator {
         int segmentW = width / countW;
         int segmentH = height / countH;
 
-        for(Point k : emojiLocations.keySet()){
+        for (Point k : emojiLocations.keySet()) {
 
             Bitmap emoji = emojiLocations.get(k);
 
@@ -296,7 +283,7 @@ public class OverlayGenerator {
         return image;
     }
 
-    public Bitmap reCreateOverlayForSize(Bitmap image, int width, int height, boolean flipHorizontal){
+    public Bitmap reCreateOverlayForSize(Bitmap image, int width, int height, boolean flipHorizontal) {
 
         image = image.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(image);
@@ -305,13 +292,13 @@ public class OverlayGenerator {
         int segmentW = width / countW;
         int segmentH = height / countH;
 
-        for(Point k : emojiLocations.keySet()){
+        for (Point k : emojiLocations.keySet()) {
 
             Bitmap emoji = emojiLocations.get(k);
 
             int dimm = getSmallerSegmentDimension(segmentH, segmentW);
 
-            if(flipHorizontal){
+            if (flipHorizontal) {
                 emoji = BitmapUtils.flipBitmap(emoji);
             }
             emoji = BitmapUtils.ScaleBitmap(emoji, dimm, dimm);
@@ -323,62 +310,32 @@ public class OverlayGenerator {
     }
 
 
-    public Bitmap getLastOverlay(){
-        if(lastOverlay == null){
+    public Bitmap getLastOverlay() {
+        if (lastOverlay == null) {
             lastOverlay = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
         }
         return lastOverlay;
     }
 
-    public Bitmap clearLastOverlay(){
+    public Bitmap clearLastOverlay() {
         emojiLocations.clear();
         lastOverlay = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
         return lastOverlay;
     }
 
-    private int getSmallerSegmentDimension(int segmentH, int segmentW){
-        if(segmentH > segmentW){
+    private int getSmallerSegmentDimension(int segmentH, int segmentW) {
+        if (segmentH > segmentW) {
             return segmentW;
-        }
-        else{
+        } else {
             return segmentH;
         }
     }
 
-    private int getBiggerSegmentDimension(int segmentH, int segmentW){
-        if(segmentH < segmentW){
+    private int getBiggerSegmentDimension(int segmentH, int segmentW) {
+        if (segmentH < segmentW) {
             return segmentW;
-        }
-        else{
+        } else {
             return segmentH;
         }
     }
-
-    /*public static Bitmap convertToMutable(final Context context, final Bitmap imgIn) {
-        final int width = imgIn.getWidth(), height = imgIn.getHeight();
-        final Config type = imgIn.getConfig();
-        File outputFile = null;
-        final File outputDir = context.getCacheDir();
-        try {
-            outputFile = File.createTempFile(Long.toString(System.currentTimeMillis()), null, outputDir);
-            outputFile.deleteOnExit();
-            final RandomAccessFile randomAccessFile = new RandomAccessFile(outputFile, "rw");
-            final FileChannel channel = randomAccessFile.getChannel();
-            final MappedByteBuffer map = channel.map(MapMode.READ_WRITE, 0, imgIn.getRowBytes() * height);
-            imgIn.copyPixelsToBuffer(map);
-            imgIn.recycle();
-            final Bitmap result = Bitmap.createBitmap(width, height, type);
-            map.position(0);
-            result.copyPixelsFromBuffer(map);
-            channel.close();
-            randomAccessFile.close();
-            outputFile.delete();
-            return result;
-        } catch (final Exception e) {
-        } finally {
-            if (outputFile != null)
-                outputFile.delete();
-        }
-        return null;
-    }*/
 }
