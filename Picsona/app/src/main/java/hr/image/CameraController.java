@@ -152,9 +152,10 @@ public class CameraController implements BaseCameraController {
                         @Override
                         public void onPictureSaved(final Uri uri) {
                             String path = mGPUImage.getPath(uri);
+                            releaseCamera();
                             if (uri.getPath() == null) {
                                 showToast("Error while saving image");
-                                resumeCamera();
+                                reSetupCamera();
                             } else {
                                 mClientCallback.onPictureSaved(uri);
                                 showToast("Picture saved at " + path);
@@ -185,12 +186,6 @@ public class CameraController implements BaseCameraController {
     @Override
     public void reSetupCamera() {
         setupCamera(mCurrentCameraId);
-    }
-
-    @Override
-    public void resumeCamera() {
-        mCamera.startPreview();
-        mGlSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
     @Override
@@ -313,13 +308,15 @@ public class CameraController implements BaseCameraController {
 
         if(optimalSizeRationed != null){
             return optimalSizeRationed;
-        }
-        else{
+        } else {
             return optimalSizeUnrationed;
         }
     }
 
     private void releaseCamera() {
+        if (mCamera == null) {
+            return;
+        }
         mCamera.setPreviewCallback(null);
         mCamera.release();
         mCamera = null;

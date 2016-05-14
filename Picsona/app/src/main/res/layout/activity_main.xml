@@ -24,6 +24,13 @@
         android:layout_height="460dp"
         android:layout_gravity="right|top" />
 
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/takenPictureView"
+        android:layout_width="match_parent"
+        android:layout_height="460dp"
+        android:layout_gravity="right|top"
+        android:visibility="gone"/>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="193dp"

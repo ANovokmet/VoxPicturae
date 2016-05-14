@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -111,6 +112,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     private ImageButton switchCameraButton;
     private ImageButton takePictureButton;
     private GPUImage mGPUImage;
+    private ImageView takenPictureView;
     private GPUImageFilter mFilter;
     private FilterCalculator mFilterCalculator;
     private Uri mSaveImagePath;
@@ -191,6 +193,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         GLSurfaceView glSurfaceView = (GLSurfaceView) findViewById(R.id.surfaceView);
         mGPUImage.setGLSurfaceView(glSurfaceView);
 
+        takenPictureView = (ImageView) findViewById(R.id.takenPictureView);
+
         switchCameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -221,6 +225,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             @Override
             public void onPictureSaved(Uri uri) {
                 mSaveImagePath = uri;
+                takenPictureView.setImageURI(uri);
+                takenPictureView.setVisibility(View.VISIBLE);
                 setCapturedPictureInterface();
             }
         });
@@ -238,6 +244,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
         glSurfaceView.getLayoutParams().height = height43;
         mGPUImageView.getLayoutParams().height = height43;
+        takenPictureView.getLayoutParams().height = height43;
 
         mOverlayGenerator = new OverlayGenerator(this);
         fkcalculator = new FakeFilterCalculator(mOverlayGenerator);
@@ -283,7 +290,10 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     private void restoreStandardInterface(){
         afterCaptureContainer.setVisibility(View.GONE);
         mainButtonContainer.setVisibility(View.VISIBLE);
-        mCameraController.resumeCamera();
+        takenPictureView.setImageDrawable(null);
+        takenPictureView.setVisibility(View.GONE);
+        takenPictureView.setVisibility(View.VISIBLE);
+        mCameraController.reSetupCamera();
         mSaveImagePath = null;
     }
 
