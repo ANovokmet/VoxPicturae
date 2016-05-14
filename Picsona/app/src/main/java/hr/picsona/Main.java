@@ -165,6 +165,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         takePictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                takePictureButton.setEnabled(false);
+                switchCameraButton.setEnabled(false);
                 takePicture();
             }
         });
@@ -184,6 +186,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         mCameraController = new CameraController(this, mGPUImage, glSurfaceView, new GPUImage.OnPictureSavedListener() {
             @Override
             public void onPictureSaved(Uri uri) {
+                takePictureButton.setEnabled(true);
+                switchCameraButton.setEnabled(true);
                 mSaveImagePath = uri;
                 takenPictureView.setImageURI(uri);
                 takenPictureView.setVisibility(View.VISIBLE);

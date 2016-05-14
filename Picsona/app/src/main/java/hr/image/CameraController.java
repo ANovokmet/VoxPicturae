@@ -165,6 +165,9 @@ public class CameraController implements BaseCameraController {
     }
 
     private void setupCamera(int cameraId) {
+        if (mCamera != null) {
+            return;
+        }
         mCamera = startCamera(cameraId);
         mParameters = mCamera.getParameters();
         setupPreviewSize();
