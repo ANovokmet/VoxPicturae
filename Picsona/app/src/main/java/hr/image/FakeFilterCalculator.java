@@ -136,15 +136,16 @@ public class FakeFilterCalculator {
     public Bitmap calculateOverlay(float gender, float anger, float sadness, float happiness, int doubleemojicount){
         Bitmap bitmap = overlayGenerator.clearLastOverlay();
 
-
-        if(gender > 0.75f){
-            overlayGenerator.prepareEmojis(3, OverlayGenerator.EmojiType.Male);
-            bitmap = overlayGenerator.reCreateOverlayWithMoreEmojis(1);
-            doubleemojicount--;
-        }else if(gender < 0.25f){
-            overlayGenerator.prepareEmojis(3, OverlayGenerator.EmojiType.Female);
-            bitmap = overlayGenerator.reCreateOverlayWithMoreEmojis(1);
-            doubleemojicount--;
+        if(doubleemojicount > 0){
+            if(gender > 0.75f){
+                overlayGenerator.prepareEmojis(3, OverlayGenerator.EmojiType.Male);
+                bitmap = overlayGenerator.reCreateOverlayWithMoreEmojis(1);
+                doubleemojicount--;
+            }else if(gender < 0.25f){
+                overlayGenerator.prepareEmojis(3, OverlayGenerator.EmojiType.Female);
+                bitmap = overlayGenerator.reCreateOverlayWithMoreEmojis(1);
+                doubleemojicount--;
+            }
         }
 
         float angerSqr = anger * anger;
