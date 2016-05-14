@@ -218,37 +218,35 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="7dp"
-        android:text="Pitch" />
+        android:text="Expressiveness" />
 
-    <SeekBar
-        android:id="@+id/seekBarPitch"
+    <RelativeLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/seekBarGender"
-        android:layout_marginTop="7dp"
-        android:max="600"
-        android:progress="300" />
+        android:layout_below="@+id/textViewRed">
 
-    <TextView
-        android:id="@+id/textViewGreen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="7dp"
-        android:layout_below="@+id/seekBarPitch"
-        android:text="Max frequency" />
-
-    <SeekBar
-        android:id="@+id/seekBarMaxFreq"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/seekBarSadness"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:max="1500"
-        android:progress="600"
-        android:indeterminate="false" />
-
+        <ImageView
+            android:id="@+id/emojis1"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/emojis1" />
+        <SeekBar
+            android:id="@+id/seekBarEmoji"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:layout_toRightOf="@+id/emojis1"
+            android:layout_toLeftOf="@+id/emojis2"
+            android:layout_centerHorizontal="true"
+            android:max="10"
+            android:progress="3"
+            android:indeterminate="false" />
+        <ImageView
+            android:id="@+id/emojis2"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/emojis2"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
 </LinearLayout>

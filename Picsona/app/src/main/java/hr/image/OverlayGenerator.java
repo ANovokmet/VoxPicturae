@@ -241,25 +241,35 @@ public class OverlayGenerator {
 
         for(int i = 0; i< count; i++){
 
-            int randx = random.nextInt(countW);
-            int randy = random.nextInt(countH);
+            Point first = new Point();
+            Point second = new Point();
+            int j = 10;//sprijecava infinite loop
+            do {
+                first.x = random.nextInt(countW);
+                first.y = random.nextInt(countH);
+                if (random.nextInt(2) == 1) {//postaviti na granice - dalje od sredine slike
+                    first.x = (random.nextInt(2) == 1 ? countW - 2 : 0) + random.nextInt(2);
+                } else {
+                    first.y = (random.nextInt(2) == 1 ? countH - 2 : 0) + random.nextInt(2);
+                }
+                second.x = countW - first.x - 1;
+                second.y = first.y;
+                j--;
+            }while ((emojiLocations.containsKey(first) || emojiLocations.containsKey(second)) && j > 0);
 
-            if(random.nextInt(2) == 1){//postaviti na granice - dalje od sredine slike
-                randx = (random.nextInt(2) == 1 ? countW-2 : 0) + random.nextInt(2);
-            }
-            else{
-                randy = (random.nextInt(2) == 1 ? countH-2 : 0) + random.nextInt(2);
-            }
+
 
             int randn = random.nextInt(bitmaps.size());
             Bitmap emoji = bitmaps.get(randn);
             int dimm = getSmallerSegmentDimension(segmentH, segmentW);
             emoji = BitmapUtils.ScaleBitmap(emoji, dimm, dimm);
 
-            emojiLocations.put(new Point(randx, randy),emoji);
-            emojiLocations.put(new Point(countW - randx - 1, randy),emoji);
-            canvas.drawBitmap(emoji, randx * segmentW, randy * segmentH, null);
-            canvas.drawBitmap(emoji,(countW - randx - 1) * segmentW, randy * segmentH, null);
+            emojiLocations.put(first,emoji);
+            emojiLocations.put(second,emoji);
+
+
+            canvas.drawBitmap(emoji, first.x * segmentW, first.y * segmentH, null);
+            canvas.drawBitmap(emoji, second.x * segmentW, second.y * segmentH, null);
         }
         return image;
     }

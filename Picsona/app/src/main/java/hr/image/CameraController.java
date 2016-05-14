@@ -115,6 +115,8 @@ public class CameraController implements BaseCameraController {
     //public Bitmap mOverlayBitmap;
     private boolean mFlipHorizontal;
 
+
+
     private Camera.PictureCallback pictureCallback = new Camera.PictureCallback(){
         @Override
         public void onPictureTaken(byte[] data,final Camera camera) {

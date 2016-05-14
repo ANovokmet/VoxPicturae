@@ -5,19 +5,13 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 
 import android.content.pm.ActivityInfo;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.media.MediaScannerConnection;
 import android.opengl.GLSurfaceView;
-import android.os.Build;
 
 import android.content.Intent;
-import android.database.Cursor;
 
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,16 +22,12 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.File;
 
 import hr.image.CameraController;
 import hr.image.FakeFilterCalculator;
@@ -305,8 +295,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
     View parameterViewLayout;
 
-    SeekBar genderSB, pitchSB, maxFreqSB, angerSB, sadnessSB, happinessSB, intensitySB;
-    int gender,pitch,maxFreq,anger,sadness,happiness,intensity;
+    SeekBar genderSB, seekBarEmoji, angerSB, sadnessSB, happinessSB, intensitySB;
+    int gender,maxFreq,anger,sadness,happiness,intensity;
 
 
     AlertDialog.Builder popDialog;
@@ -322,26 +312,33 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         genderSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarGender);
         genderSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         genderSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
-        pitchSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarPitch);
-        maxFreqSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarMaxFreq);
+
+        seekBarEmoji = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarEmoji);
+        seekBarEmoji.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+        seekBarEmoji.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+
         angerSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarAnger);
         angerSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         angerSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+
         sadnessSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarSadness);
         sadnessSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         sadnessSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+
         happinessSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarHappiness);
         happinessSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         happinessSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+
         intensitySB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarIntensity);
         intensitySB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         intensitySB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+
+
     }
 
     private void getProgresses(){
         gender = genderSB.getProgress();
-        pitch = pitchSB.getProgress();
-        maxFreq = maxFreqSB.getProgress();
+        numOfDoubleEmojis = seekBarEmoji.getProgress();
         anger = angerSB.getProgress();
         sadness = sadnessSB.getProgress();
         happiness = happinessSB.getProgress();
@@ -355,8 +352,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         popDialog.setView(parameterViewLayout);
 
         genderSB.setProgress(gender);
-        pitchSB.setProgress(pitch);
-        maxFreqSB.setProgress(maxFreq);
+        seekBarEmoji.setProgress(numOfDoubleEmojis);
         angerSB.setProgress(anger);
         sadnessSB.setProgress(sadness);
         happinessSB.setProgress(happiness);
@@ -371,9 +367,9 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
                     ((ViewGroup) parameterViewLayout.getParent()).removeView(parameterViewLayout);
                 }
 
-                mFilter = fkcalculator.calculateFilter((float) gender / 100, (float) pitch, (float) maxFreq, (float) anger / 100, (float) sadness / 100, (float) happiness / 100, (float) intensity / 400);
+                mFilter = fkcalculator.calculateFilter((float) gender / 100, (float) 420, (float) maxFreq, (float) anger / 100, (float) sadness / 100, (float) happiness / 100, (float) intensity / 400);
 
-                Bitmap bitmap = fkcalculator.calculateOverlay((float) gender / 100, (float) anger / 100, (float) sadness / 100, (float) happiness / 100);
+                Bitmap bitmap = fkcalculator.calculateOverlay((float) gender / 100, (float) anger / 100, (float) sadness / 100, (float) happiness / 100, numOfDoubleEmojis);
                 mGPUImageView.setImage(bitmap);
 
 
@@ -464,16 +460,18 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         getProgresses();
 
         mFilter = fkcalculator.calculateFilter(result);
-        Bitmap bitmap = fkcalculator.calculateOverlay(result);
+        Bitmap bitmap = fkcalculator.calculateOverlay(result, numOfDoubleEmojis);
         mGPUImageView.setImage(bitmap);
         mGPUImage.setFilter(mFilter);
 
     }
 
+    int numOfDoubleEmojis = 3;
+
     private void setProgresses(ProcessingResult result) {
         genderSB.setProgress((int) (result.getGenderProbability() * 100));
-        pitchSB.setProgress((int) (result.getPitch()));
-        maxFreqSB.setProgress((int) (result.getMaxFrequency()));
+        seekBarEmoji.setProgress(numOfDoubleEmojis);
+        maxFreq = (int)result.getMaxFrequency();
         angerSB.setProgress((int) (result.getEmotionData().getAngerProbability() * 100));
         sadnessSB.setProgress((int) (result.getEmotionData().getSadnessProbability() * 100));
         happinessSB.setProgress((int) (result.getEmotionData().getHappinessProbability() * 100));
