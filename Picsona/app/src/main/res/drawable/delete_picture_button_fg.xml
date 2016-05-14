@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true" >
-        <bitmap android:src="@mipmap/take_picture" />
+        <bitmap android:src="@mipmap/delete_photo" />
     </item>
     <item android:state_enabled="false" >
-        <bitmap android:src="@mipmap/take_picture_d" />
+        <bitmap android:src="@mipmap/delete_photo" />
     </item>
     <item>
         <bitmap
-            android:src="@mipmap/take_picture_a" />
+            android:src="@mipmap/delete_photo_a" />
     </item>
 </selector>

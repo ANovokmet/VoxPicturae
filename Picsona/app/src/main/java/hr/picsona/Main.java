@@ -9,6 +9,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.media.MediaScannerConnection;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 
@@ -28,11 +29,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
 
 import hr.image.CameraController;
 import hr.image.FakeFilterCalculator;
@@ -109,6 +113,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     private GPUImage mGPUImage;
     private GPUImageFilter mFilter;
     private FilterCalculator mFilterCalculator;
+    private String mSaveImagePath;
+    private View mainButtonContainer, afterCaptureContainer;
     private CameraController mCameraController;
     private ProgressBar soundGraph;
 
@@ -133,18 +139,6 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         });
 
         InitializeSoundControls();
-
-        findViewById(R.id.buttonLoadImage).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent chooseFile;
-                Intent chooserWrapper;
-                chooseFile = new Intent(Intent.ACTION_PICK);
-                chooseFile.setType("image/jpeg");
-                chooserWrapper = Intent.createChooser(chooseFile, "Choose a picture");
-                startActivityForResult(chooserWrapper, ACTIVITY_CHOOSE_FILE);
-            }
-        });
 
         InitializeCameraControls();
 
@@ -187,6 +181,9 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     }
 
     private void InitializeCameraControls() {
+        mainButtonContainer = findViewById(R.id.buttonContainer);
+        afterCaptureContainer = findViewById(R.id.afterCaptureContainer);
+
         mFilterCalculator = new FilterCalculator();
 
         mGPUImage = new GPUImage(this);
@@ -208,16 +205,21 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             }
         });
 
-        Button editParamsButton = (Button) findViewById(R.id.buttonEditParams);
+        ImageButton editParamsButton = (ImageButton) findViewById(R.id.buttonEditParams);
         editParamsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showEditParamsDialog();
-
             }
         });
 
-        mCameraController = new CameraController(this, mGPUImage, glSurfaceView);
+        mCameraController = new CameraController(this, mGPUImage, glSurfaceView, new GPUImage.OnPictureSavedListener() {
+            @Override
+            public void onPictureSaved(String path) {
+                mSaveImagePath = path;
+                setCapturedPictureInterface();
+            }
+        });
 
         Display display = getWindowManager().getDefaultDisplay();
         int width = display.getWidth();
@@ -239,12 +241,55 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
         mCameraController.setOverlayGenerator(mOverlayGenerator);
 
+        findViewById(R.id.buttonSharePicture).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        findViewById(R.id.buttonDeletePicture).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                File file = new File(mSaveImagePath);
+                String filePath = file.toString();
+                String directoryPath = filePath.substring(0, filePath.lastIndexOf("/"));
+                MediaScannerConnection.scanFile(Main.this,
+                        new String[]{
+                                filePath
+                        }, null,
+                        new MediaScannerConnection.OnScanCompletedListener() {
+                            @Override
+                            public void onScanCompleted(String s, Uri uri) {
+
+                            }
+                        });
+                boolean success = file.delete();
+                if (!success) {
+                    Toast.makeText(Main.this, "Error while deleting picture", Toast.LENGTH_SHORT).show();
+                }
+                restoreStandardInterface();
+            }
+        });
+
 
         /*ArrayList<GPUImageFilter> filters = new ArrayList<GPUImageFilter>();
         filters.add(new GPUImageContrastFilter(1.5f));
         filters.add(new GPUImageRGBFilter(237/255.f,221/255.f,158/255.f));
             //++levels filter
         mGPUImage.setFilter(new GPUImageFilterGroup(filters));*/
+    }
+
+    private void setCapturedPictureInterface(){
+        mainButtonContainer.setVisibility(View.GONE);
+        afterCaptureContainer.setVisibility(View.VISIBLE);
+    }
+
+    private void restoreStandardInterface(){
+        afterCaptureContainer.setVisibility(View.GONE);
+        mainButtonContainer.setVisibility(View.VISIBLE);
+        mCameraController.resumeCamera();
+        mSaveImagePath = null;
     }
 
     OverlayGenerator mOverlayGenerator;
@@ -262,16 +307,30 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     AlertDialog.Builder popDialog;
 
     private void InitializeParameterSeekbars() {
+        if (parameterViewLayout != null && parameterViewLayout instanceof ViewGroup) {
+            return;
+        }
         final LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
-        parameterViewLayout = inflater.inflate(R.layout.parameter_popup, (ViewGroup) findViewById(R.id.layout_dialog));
+        parameterViewLayout = inflater.inflate(R.layout.parameter_popup, null);
+
 
         genderSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarGender);
+        genderSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+        genderSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         pitchSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarPitch);
         maxFreqSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarMaxFreq);
         angerSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarAnger);
+        angerSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+        angerSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         sadnessSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarSadness);
+        sadnessSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+        sadnessSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         happinessSB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarHappiness);
+        happinessSB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+        happinessSB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
         intensitySB = (SeekBar) parameterViewLayout.findViewById(R.id.seekBarIntensity);
+        intensitySB.getProgressDrawable().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
+        intensitySB.getThumb().setColorFilter(getResources().getColor(R.color.buttonEnabled), PorterDuff.Mode.SRC_IN);
     }
 
     private void getProgresses(){
@@ -298,26 +357,24 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         happinessSB.setProgress(happiness);
         intensitySB.setProgress(intensity);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            popDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialogInterface) {
+        popDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
 
-                    getProgresses();
-
-                    mFilter = fkcalculator.calculateFilter((float)gender/100, (float)pitch, (float)maxFreq, (float)anger/100, (float)sadness/100, (float)happiness/100, (float)intensity/400);
-
-                    Bitmap bitmap = fkcalculator.calculateOverlay((float) gender / 100, (float) anger / 100, (float) sadness / 100, (float) happiness / 100);
-                    mGPUImageView.setImage(bitmap);
-
-
-                    mGPUImage.setFilter(mFilter);
+                getProgresses();
+                if (parameterViewLayout instanceof ViewGroup) {
+                    ((ViewGroup) parameterViewLayout.getParent()).removeView(parameterViewLayout);
                 }
-            });
-        }
+
+                mFilter = fkcalculator.calculateFilter((float) gender / 100, (float) pitch, (float) maxFreq, (float) anger / 100, (float) sadness / 100, (float) happiness / 100, (float) intensity / 400);
+
+                Bitmap bitmap = fkcalculator.calculateOverlay((float) gender / 100, (float) anger / 100, (float) sadness / 100, (float) happiness / 100);
+                mGPUImageView.setImage(bitmap);
 
 
-        popDialog.create();
+                mGPUImage.setFilter(mFilter);
+            }
+        });
         popDialog.show();
     }
 
@@ -393,6 +450,8 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
             }
         });
 
+        soundGraph.setProgress(0);
+
         //mFilter = mFilterCalculator.calculateFilter(result);
         //mGPUImage.setFilter(mFilter);
 
@@ -412,7 +471,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         maxFreqSB.setProgress((int)(result.getMaxFrequency()));
         angerSB.setProgress((int) (result.getEmotionData().getAngerProbability() * 100));
         sadnessSB.setProgress((int) (result.getEmotionData().getSadnessProbability() * 100));
-        happinessSB.setProgress((int)(result.getEmotionData().getHappinessProbability() * 100));
+        happinessSB.setProgress((int) (result.getEmotionData().getHappinessProbability() * 100));
         intensitySB.setProgress((int) (result.getEmotionData().getSpeechIntensity() * 100));
     }
 
@@ -433,47 +492,12 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case ACTIVITY_CHOOSE_FILE:
-                if (data == null) {
-                    Toast.makeText(this, "Image loading error", Toast.LENGTH_SHORT).show();
-                    break;
-                }
-                Uri uri = data.getData();
-                String path = uri.toString();
-                if (path.startsWith("content")) {
-                    try {
-                        path = getRealPathFromURI(uri);
-                    } catch (Exception e) {
-                        Toast.makeText(this, "Supported format is JPG", Toast.LENGTH_SHORT).show();
-                        break;
-                    }
-                }
-                if (!path.endsWith(".jpg") && !path.endsWith(".jpeg")) {
-                    Toast.makeText(this, "Supported format is JPG", Toast.LENGTH_SHORT).show();
-                    break;
-                }
-                //mCameraController.stopCamera();
-                //mGPUImage.setImage(uri);
-                break;
-            default:
-                Toast.makeText(this, "Image loading error", Toast.LENGTH_SHORT).show();
+    public void onBackPressed() {
+        if (mSaveImagePath != null) {
+            restoreStandardInterface();
+        } else {
+            super.onBackPressed();
         }
-    }
-
-    public String getRealPathFromURI(Uri contentUri) throws Exception {
-
-        String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = this.getContentResolver().query(contentUri,
-                proj,
-                null,
-                null,
-                null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-
-        return cursor.getString(column_index);
     }
 
     private void switchCamera() {

@@ -99,13 +99,13 @@
             android:max="5000"
             android:visibility="visible"
             android:layout_toRightOf="@+id/buttonSwitchCamera"
-            android:layout_toLeftOf="@+id/buttonLoadImage"/>
+            android:layout_toLeftOf="@+id/buttonEditParams"/>
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/buttonLoadImage"
-            android:src="@mipmap/load_photo"
+            android:id="@+id/buttonEditParams"
+            android:src="@mipmap/set_params"
             android:layout_gravity="right|top"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
@@ -115,17 +115,49 @@
             android:paddingLeft="10dp"
             android:paddingBottom="10dp" />
 
-        <Button
-            style="?android:attr/buttonStyleSmall"
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/afterCaptureContainer"
+        android:layout_width="match_parent"
+        android:layout_below="@+id/surfaceView"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center_horizontal|bottom"
+        android:visibility="gone">
+
+        <RelativeLayout
+            android:id="@+id/afterCaptureButtonsContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Edit params"
-            android:id="@+id/buttonEditParams"
-            android:backgroundTint="#ffc107"
-            android:textColor="#9c27b0"
-            android:layout_below="@+id/mainButtonsContainer"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_horizontal">
+
+            <ImageButton
+                android:layout_width="100dp"
+                android:layout_height="75dp"
+                android:id="@+id/buttonSharePicture"
+                android:src="@drawable/share_button_fg"
+                android:background="@drawable/record_sound_button"
+                android:paddingRight="5dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:paddingLeft="15dp" />
+
+            <ImageButton
+                android:layout_width="100dp"
+                android:layout_height="75dp"
+                android:background="@drawable/take_picture_button"
+                android:src="@drawable/delete_picture_button_fg"
+                android:id="@+id/buttonDeletePicture"
+                android:layout_alignBottom="@+id/buttonSharePicture"
+                android:layout_toRightOf="@+id/buttonSharePicture"
+                android:paddingRight="15dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:paddingLeft="5dp" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
 

@@ -526,7 +526,7 @@ public class GPUImage {
 
                                         @Override
                                         public void run() {
-                                            mListener.onPictureSaved(uri);
+                                            mListener.onPictureSaved(uri.toString());
                                         }
                                     });
                                 }
@@ -599,7 +599,7 @@ public class GPUImage {
 
                                         @Override
                                         public void run() {
-                                            mListener.onPictureSaved(uri);
+                                            mListener.onPictureSaved(uri.toString());
                                         }
                                     });
                                 }
@@ -630,7 +630,7 @@ public class GPUImage {
     }
 
     public interface OnPictureSavedListener {
-        void onPictureSaved(Uri uri);
+        void onPictureSaved(String path);
     }
 
     private class LoadImageUriTask extends LoadImageTask {

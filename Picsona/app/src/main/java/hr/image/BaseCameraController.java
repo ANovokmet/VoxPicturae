@@ -9,5 +9,6 @@ public interface BaseCameraController {
     void takePicture();
     void cycleCamera();
     void reSetupCamera();
+    void resumeCamera();
     void stopCamera();
 }

@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.Surface;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class CameraController implements BaseCameraController {
     private Camera mCamera;
     private GPUImage mGPUImage;
     private Camera.Parameters mParameters;
+    private GPUImage.OnPictureSavedListener mClientCallback;
 
     private int numberOfCameras;
     private int screenWidth;
@@ -34,13 +36,13 @@ public class CameraController implements BaseCameraController {
 
     private GLSurfaceView mGlSurfaceView;
 
-    public CameraController(Activity activity, GPUImage gpuImage, GLSurfaceView glSurfaceView){
+    public CameraController(Activity activity, GPUImage gpuImage, GLSurfaceView glSurfaceView, GPUImage.OnPictureSavedListener clientCallback){
         mGPUImage = gpuImage;
         numberOfCameras = Camera.getNumberOfCameras();
         mCurrentCameraId = 0;
         mGlSurfaceView = glSurfaceView;
         this.activity = activity;
-
+        mClientCallback = clientCallback;
 
     }
 
@@ -145,10 +147,14 @@ public class CameraController implements BaseCameraController {
                     new GPUImage.OnPictureSavedListener() {
 
                         @Override
-                        public void onPictureSaved(final Uri uri) {
-                            //pictureFile.delete();
-                            camera.startPreview();
-                            view.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+                        public void onPictureSaved(final String path) {
+                            if (path == null) {
+                                Toast.makeText(activity, "Error while saving image", Toast.LENGTH_SHORT).show();
+                                resumeCamera();
+                            } else {
+                                mClientCallback.onPictureSaved(path);
+                                Toast.makeText(activity, "Picture saved at " + path, Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
 
@@ -168,6 +174,12 @@ public class CameraController implements BaseCameraController {
     @Override
     public void reSetupCamera() {
         setupCamera(mCurrentCameraId);
+    }
+
+    @Override
+    public void resumeCamera() {
+        mCamera.startPreview();
+        mGlSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
     @Override

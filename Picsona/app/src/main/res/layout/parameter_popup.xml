@@ -3,7 +3,18 @@
     android:id="@+id/layout_dialog"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:text="Recognized values"
+        android:textSize="25dp" />
 
     <TextView
         android:id="@+id/textViewRed"
@@ -14,16 +25,191 @@
         android:layout_marginTop="7dp"
         android:text="Gender" />
 
-    <SeekBar
-        android:id="@+id/seekBarGender"
+    <RelativeLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/textViewRed"
+        android:layout_below="@+id/textViewRed">
+
+        <ImageView
+            android:id="@+id/gender1"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/gender1" />
+        <SeekBar
+            android:id="@+id/seekBarGender"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:layout_toRightOf="@+id/gender1"
+            android:layout_toLeftOf="@+id/gender2"
+            android:layout_centerHorizontal="true"
+            android:max="100"
+            android:progress="50"
+            android:indeterminate="false" />
+        <ImageView
+            android:id="@+id/gender2"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/gender2"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textViewAnger"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="7dp"
-        android:max="100"
-        android:progress="50"
-        android:indeterminate="false" />
+        android:text="Anger" />
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewRed">
+
+        <ImageView
+            android:id="@+id/anger1"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/neutral" />
+        <SeekBar
+            android:id="@+id/seekBarAnger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:layout_toRightOf="@+id/anger1"
+            android:layout_toLeftOf="@+id/anger2"
+            android:layout_centerHorizontal="true"
+            android:max="100"
+            android:progress="50"
+            android:indeterminate="false" />
+        <ImageView
+            android:id="@+id/anger2"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/a14"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textViewBlue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="7dp"
+        android:text="Sadness" />
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewRed">
+
+        <ImageView
+            android:id="@+id/sadness1"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/neutral" />
+        <SeekBar
+            android:id="@+id/seekBarSadness"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:layout_toRightOf="@+id/sadness1"
+            android:layout_toLeftOf="@+id/sadness2"
+            android:layout_centerHorizontal="true"
+            android:max="100"
+            android:progress="50"
+            android:indeterminate="false" />
+        <ImageView
+            android:id="@+id/sadness2"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/s10"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="7dp"
+        android:text="Happiness" />
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewRed">
+
+        <ImageView
+            android:id="@+id/happiness1"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/neutral" />
+        <SeekBar
+            android:id="@+id/seekBarHappiness"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:layout_toRightOf="@+id/happiness1"
+            android:layout_toLeftOf="@+id/happiness2"
+            android:layout_centerHorizontal="true"
+            android:max="100"
+            android:progress="50"
+            android:indeterminate="false" />
+        <ImageView
+            android:id="@+id/happiness2"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/h3"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textViewIntensity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:text="Speech intensity"
+        android:layout_alignLeft="@+id/textViewRed"
+        android:layout_alignStart="@+id/textViewRed" />
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewRed">
+
+        <ImageView
+            android:id="@+id/intensity1"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/f9" />
+        <SeekBar
+            android:id="@+id/seekBarIntensity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:layout_toRightOf="@+id/intensity1"
+            android:layout_toLeftOf="@+id/intensity2"
+            android:layout_centerHorizontal="true"
+            android:max="400"
+            android:progress="100"
+            android:indeterminate="false" />
+        <ImageView
+            android:id="@+id/intensity2"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/h12"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/textView"
@@ -64,82 +250,5 @@
         android:max="1500"
         android:progress="600"
         android:indeterminate="false" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="7dp"
-        android:text="Anger" />
-
-    <SeekBar
-        android:id="@+id/seekBarAnger"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/seekBarMaxFreq"
-        android:layout_marginTop="7dp"
-        android:max="100"
-        android:progress="50"/>
-
-    <TextView
-        android:id="@+id/textViewBlue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="7dp"
-        android:text="Sadness" />
-
-    <SeekBar
-        android:id="@+id/seekBarSadness"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/seekBarIntensity"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:max="100"
-        android:progress="50" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="7dp"
-        android:text="Happiness" />
-
-    <SeekBar
-        android:id="@+id/seekBarHappiness"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/seekBarAnger"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:max="100"
-        android:progress="50" />
-
-    <TextView
-        android:id="@+id/textViewComposite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speech intensity"
-        android:layout_below="@+id/seekBarPitch"
-        android:layout_alignLeft="@+id/textViewRed"
-        android:layout_alignStart="@+id/textViewRed" />
-
-    <SeekBar
-        android:id="@+id/seekBarIntensity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:max="400"
-        android:progress="100"  />
-
 
 </LinearLayout>
