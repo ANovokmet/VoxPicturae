@@ -34,12 +34,13 @@ public class SaverTasker {
         new SaveWithOverlayTask(bitmap, overlayGenerator, orientation, flipHorizontally, folderName, fileName, listener).execute();
     }
 
-    private class SaveWithOverlayTask extends AsyncTask<Void, Void, String> {
+    private class SaveWithOverlayTask extends AsyncTask<Void, Void, Void> {
 
         private final Bitmap mBitmap;
         private final String mFolderName;
         private final String mFileName;
         private final GPUImage.OnPictureSavedListener mListener;
+        private final Handler mHandler;
 
         private final OverlayGenerator mOverlayGenerator;
         private final int mOrientation;
@@ -54,29 +55,24 @@ public class SaverTasker {
             mFolderName = folderName;
             mFileName = fileName;
             mListener = listener;
+            mHandler = new Handler();
 
             mOrientation = orientation;
             this.flipHorizontally = flipHorizontally;
         }
 
         @Override
-        protected String doInBackground(final Void... params) {
+        protected Void doInBackground(final Void... params) {
             Bitmap result = mGPUImage.getBitmapWithFilterAppliedAndRotation(mBitmap, mOrientation, flipHorizontally);
 
             //TODO FLIP WHEN flipHoriz == true;
             result = mOverlayGenerator.reCreateOverlayForSize(result,result.getWidth(),result.getHeight(), flipHorizontally);
 
-            return saveImage(mFolderName, mFileName, result);
+            saveImage(mFolderName, mFileName, result);
+            return null;
         }
 
-        @Override
-        protected void onPostExecute(final String result) {
-            if (mListener != null) {
-                mListener.onPictureSaved(result);
-            }
-        }
-
-        private String saveImage(final String folderName, final String fileName, final Bitmap image) {
+        private void saveImage(final String folderName, final String fileName, final Bitmap image) {
             File path = Environment
                     .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             File file = new File(path, folderName + "/" + fileName);
@@ -87,12 +83,22 @@ public class SaverTasker {
                         new String[]{
                                 file.toString()
                         }, null,
-                        null);
+                        new MediaScannerConnection.OnScanCompletedListener() {
+                            @Override
+                            public void onScanCompleted(String s, final Uri uri) {
+                                if (mListener != null) {
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mListener.onPictureSaved(uri);
+                                        }
+                                    });
+                                }
+                            }
+                        });
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-                return null;
             }
-            return file.getAbsolutePath();
         }
     }
 

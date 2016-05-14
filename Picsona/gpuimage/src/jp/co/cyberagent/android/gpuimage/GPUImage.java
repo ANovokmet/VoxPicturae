@@ -244,7 +244,7 @@ public class GPUImage {
         new LoadImageFileTask(this, file).execute();
     }
 
-    private String getPath(final Uri uri) {
+    public String getPath(final Uri uri) {
         String[] projection = {
                 MediaStore.Images.Media.DATA,
         };
@@ -526,7 +526,7 @@ public class GPUImage {
 
                                         @Override
                                         public void run() {
-                                            mListener.onPictureSaved(uri.toString());
+                                            mListener.onPictureSaved(uri);
                                         }
                                     });
                                 }
@@ -599,7 +599,7 @@ public class GPUImage {
 
                                         @Override
                                         public void run() {
-                                            mListener.onPictureSaved(uri.toString());
+                                            mListener.onPictureSaved(uri);
                                         }
                                     });
                                 }
@@ -630,7 +630,7 @@ public class GPUImage {
     }
 
     public interface OnPictureSavedListener {
-        void onPictureSaved(String path);
+        void onPictureSaved(Uri uri);
     }
 
     private class LoadImageUriTask extends LoadImageTask {

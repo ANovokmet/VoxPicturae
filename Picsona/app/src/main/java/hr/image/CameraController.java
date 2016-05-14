@@ -8,10 +8,13 @@ import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.Surface;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
 
+import hr.picsona.Main;
+import hr.picsona.R;
 import jp.co.cyberagent.android.gpuimage.GPUImage;
 
 /**
@@ -147,13 +150,14 @@ public class CameraController implements BaseCameraController {
                     new GPUImage.OnPictureSavedListener() {
 
                         @Override
-                        public void onPictureSaved(final String path) {
-                            if (path == null) {
-                                Toast.makeText(activity, "Error while saving image", Toast.LENGTH_SHORT).show();
+                        public void onPictureSaved(final Uri uri) {
+                            String path = mGPUImage.getPath(uri);
+                            if (uri.getPath() == null) {
+                                showToast("Error while saving image");
                                 resumeCamera();
                             } else {
-                                mClientCallback.onPictureSaved(path);
-                                Toast.makeText(activity, "Picture saved at " + path, Toast.LENGTH_SHORT).show();
+                                mClientCallback.onPictureSaved(uri);
+                                showToast("Picture saved at " + path);
                             }
                         }
                     });
@@ -161,6 +165,13 @@ public class CameraController implements BaseCameraController {
 
         }
     };
+
+    private void showToast(String message){
+        Toast toast = Toast.makeText(activity, message, Toast.LENGTH_SHORT);
+        toast.getView().setBackgroundColor(activity.getResources().getColor(R.color.buttonEnabled));
+        ((TextView) toast.getView().findViewById(android.R.id.message)).setTextColor(activity.getResources().getColor(R.color.white));
+        toast.show();
+    }
 
 
     @Override

@@ -113,7 +113,7 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     private GPUImage mGPUImage;
     private GPUImageFilter mFilter;
     private FilterCalculator mFilterCalculator;
-    private String mSaveImagePath;
+    private Uri mSaveImagePath;
     private View mainButtonContainer, afterCaptureContainer;
     private CameraController mCameraController;
     private ProgressBar soundGraph;
@@ -209,14 +209,18 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         editParamsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showEditParamsDialog();
+                if (mFilter == null) {
+                    showToast("No available filter for modification");
+                } else {
+                    showEditParamsDialog();
+                }
             }
         });
 
         mCameraController = new CameraController(this, mGPUImage, glSurfaceView, new GPUImage.OnPictureSavedListener() {
             @Override
-            public void onPictureSaved(String path) {
-                mSaveImagePath = path;
+            public void onPictureSaved(Uri uri) {
+                mSaveImagePath = uri;
                 setCapturedPictureInterface();
             }
         });
@@ -244,29 +248,20 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
         findViewById(R.id.buttonSharePicture).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent shareIntent = new Intent();
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_STREAM, mSaveImagePath);
+                shareIntent.setType("image/jpeg");
+                startActivity(Intent.createChooser(shareIntent, "Share Image"));
             }
         });
 
         findViewById(R.id.buttonDeletePicture).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                File file = new File(mSaveImagePath);
-                String filePath = file.toString();
-                String directoryPath = filePath.substring(0, filePath.lastIndexOf("/"));
-                MediaScannerConnection.scanFile(Main.this,
-                        new String[]{
-                                filePath
-                        }, null,
-                        new MediaScannerConnection.OnScanCompletedListener() {
-                            @Override
-                            public void onScanCompleted(String s, Uri uri) {
-
-                            }
-                        });
-                boolean success = file.delete();
-                if (!success) {
-                    Toast.makeText(Main.this, "Error while deleting picture", Toast.LENGTH_SHORT).show();
+                int deleted = getContentResolver().delete(mSaveImagePath, null, null);
+                if (deleted!=1) {
+                    showToast("Error while deleting picture");
                 }
                 restoreStandardInterface();
             }
@@ -466,13 +461,20 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
     }
 
     private void setProgresses(ProcessingResult result) {
-        genderSB.setProgress((int)(result.getGenderProbability() * 100));
-        pitchSB.setProgress((int)(result.getPitch()));
-        maxFreqSB.setProgress((int)(result.getMaxFrequency()));
+        genderSB.setProgress((int) (result.getGenderProbability() * 100));
+        pitchSB.setProgress((int) (result.getPitch()));
+        maxFreqSB.setProgress((int) (result.getMaxFrequency()));
         angerSB.setProgress((int) (result.getEmotionData().getAngerProbability() * 100));
         sadnessSB.setProgress((int) (result.getEmotionData().getSadnessProbability() * 100));
         happinessSB.setProgress((int) (result.getEmotionData().getHappinessProbability() * 100));
         intensitySB.setProgress((int) (result.getEmotionData().getSpeechIntensity() * 100));
+    }
+
+    private void showToast(String message){
+        Toast toast = Toast.makeText(Main.this, message, Toast.LENGTH_SHORT);
+        toast.getView().setBackgroundColor(getResources().getColor(R.color.buttonEnabled));
+        ((TextView) toast.getView().findViewById(android.R.id.message)).setTextColor(getResources().getColor(R.color.white));
+        toast.show();
     }
 
     @Override
