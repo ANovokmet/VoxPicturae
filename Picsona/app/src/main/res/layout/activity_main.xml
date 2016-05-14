@@ -31,18 +31,6 @@
         android:layout_gravity="right|top"
         android:visibility="gone"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="193dp"
-        android:text="Debug data"
-        android:id="@+id/debugView"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_gravity="left|top"
-        android:visibility="gone"/>
-
     <RelativeLayout
         android:id="@+id/buttonContainer"
         android:layout_width="match_parent"
