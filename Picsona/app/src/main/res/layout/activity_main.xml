@@ -40,7 +40,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_gravity="left|top" />
+        android:layout_gravity="left|top"
+        android:visibility="gone"/>
 
     <RelativeLayout
         android:id="@+id/buttonContainer"

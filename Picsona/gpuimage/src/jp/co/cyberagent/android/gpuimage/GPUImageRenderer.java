@@ -148,9 +148,11 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         }
     }
 
+    Size previewSizeForPreview;
+
     @Override
     public void onPreviewFrame(final byte[] data, final Camera camera) {
-        final Size previewSize = camera.getParameters().getPreviewSize();
+        final Size previewSize = previewSizeForPreview;
         if (mGLRgbBuffer == null) {
             mGLRgbBuffer = IntBuffer.allocate(previewSize.width * previewSize.height);
         }
@@ -184,6 +186,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
                 GLES20.glGenTextures(1, textures, 0);
                 mSurfaceTexture = new SurfaceTexture(textures[0]);
                 final Size previewSize = camera.getParameters().getPreviewSize();
+                previewSizeForPreview = camera.getParameters().getPreviewSize();
                 Camera.Parameters params = camera.getParameters();
                 params.setPreviewFormat(ImageFormat.NV21);
                 camera.setParameters(params);

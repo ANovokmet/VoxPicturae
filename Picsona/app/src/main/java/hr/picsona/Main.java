@@ -381,12 +381,12 @@ public class Main extends AppCompatActivity implements SoundProcessing.OnProcess
 
     @Override
     public void onFinish(final ProcessingResult result) {
-        runOnUiThread(new Runnable() {
+        /*runOnUiThread(new Runnable() {  //debug view
             @Override
             public void run() {
                 ((TextView) findViewById(R.id.debugView)).setText("" + result);
             }
-        });
+        }); */
 
         soundGraph.setProgress(0);
 
